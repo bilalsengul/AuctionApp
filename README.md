@@ -8,7 +8,7 @@
 - View a list of active auctions
 - View the details of a specific auction, including the current highest bid
 - Receive notifications when a bid is placed on one of your auctions
-- Test the structure that can bid for you with the automatic bidding feature.
+- With the automatic bidding feature, it can track and bid on auctions for you. 
 
 ## Getting Started
 &nbsp;1. Clone the repository
