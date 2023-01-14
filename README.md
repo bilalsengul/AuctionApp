@@ -14,7 +14,7 @@
 &nbsp;1. Clone the repository
 
 ```bash
-git clone https://github.com/<your-username>/auction-app.git
+git clone https://github.com/bilalsengul/AuctionApp.git
 ```
 
 &nbsp;2. Install dependencies
