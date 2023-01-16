@@ -1,76 +1,76 @@
 <template>
 <div v-if="this.$store.state.loggedIn">
-    <b-container fluid>
-        <b-row>
-            <b-col offset-md="1">
-                <h1>Profile</h1>
-                <hr class="my-4" />
-            </b-col>
-        </b-row>
-        <b-row align-h="center">
-            <b-col cols="4" md="1" class="my-4">
-                <b-img-lazy thumbnail class="rounded" src="https://icon-library.com/images/default-user-icon/default-user-icon-8.jpg" alt="Defaul User Icon">
-                </b-img-lazy>
-            </b-col>
+    <el-card class="w-25 m-auto">
+        <b-container fluid>
+            <b-row>
+                <b-col offset-md="3">
+                    <h1>Profile</h1>
+                    <hr class="my-4" />
+                </b-col>
+            </b-row>
+            <b-row align-h="center">
 
-            <b-col cols="12" md="11">
-                <b-tabs content-class="mt-3" card id="app">
-                    <b-tab title="Info" active>
-                        <b-list-group>
-                            <b-list-group-item>
-                                <span class="p-1 mr-3">
-                                    <b-avatar icon="person-badge" /></span>
-                                {{global.userInfo.username}}
-                            </b-list-group-item>
-                            <b-list-group-item>
-                                <span class="p-1 mr-3">
-                                    <b-avatar icon="person" /></span>
-                                {{global.userInfo.name}} {{global.userInfo.surname}}
-                            </b-list-group-item>
-                            <b-list-group-item>
-                                <span class="p-1 mr-3">
-                                    <b-avatar icon="at" /></span>
-                                {{global.userInfo.email}}
-                            </b-list-group-item>
-                        </b-list-group>
-                        <br />
-                    </b-tab>
-                    <b-tab title="Roles">
-                        <b-list-group>
-                            <b-list-group-item v-for="item in this.global.userInfo.roles">
-                                <span class="p-1 mr-3">
-                                    <b-avatar icon="nut" /></span>
-                                <span class="text-capitalize">{{item.toLowerCase()}}</span>
-                            </b-list-group-item>
-                        </b-list-group>
-                    </b-tab>
-                    <b-tab title="Bid Settings">
-                        <el-table :data="auctions" style="width: 100%" max-height="250">
-                            <el-table-column fixed prop="name" label="Name" width="150">
-                            </el-table-column>
-                            <el-table-column prop="description" label="Name" width="120">
-                            </el-table-column>
-                            <el-table-column prop="minimumAutoBidPrice" label="State" width="120">
-                            </el-table-column>
-                            <el-table-column prop="onAuction" label="City" width="120">
-                            </el-table-column>
-                            <el-table-column prop="openingPrice" label="Address" width="300">
-                            </el-table-column>
-                            <el-table-column prop="auctionEndDate" label="Zip" width="120">
-                            </el-table-column>
-                            <el-table-column fixed="right" label="Operations" width="120">
-                                <template slot-scope="scope">
-                                    <el-button @click.native.prevent="deleteRow(scope.$index, tableData)" type="text" size="small">
-                                        Remove
-                                    </el-button>
-                                </template>
-                            </el-table-column>
-                        </el-table>
-                    </b-tab>
-                </b-tabs>
-            </b-col>
-        </b-row>
-    </b-container>
+                <b-col cols="12" md="3" class="my-4">
+                    <b-img-lazy thumbnail class="rounded" src="https://icon-library.com/images/default-user-icon/default-user-icon-8.jpg" alt="Defaul User Icon">
+                    </b-img-lazy>
+                </b-col>
+
+                <b-col cols="12" md="9">
+                    <b-tabs content-class="mt-3" card id="app">
+                        <b-tab title="Info" active>
+                            <b-list-group>
+                                <b-list-group-item>
+                                    <span class="p-1 mr-3">
+                                        <b-avatar icon="person-badge" /></span>
+                                    {{global.userInfo.username}}
+                                </b-list-group-item>
+                                <b-list-group-item>
+                                    <span class="p-1 mr-3">
+                                        <b-avatar icon="person" /></span>
+                                    {{global.userInfo.name}} {{global.userInfo.surname}}
+                                </b-list-group-item>
+                                <b-list-group-item>
+                                    <span class="p-1 mr-3">
+                                        <b-avatar icon="at" /></span>
+                                    {{global.userInfo.email}}
+                                </b-list-group-item>
+                            </b-list-group>
+                            <br />
+                        </b-tab>
+                        <b-tab title="Roles">
+                            <b-list-group>
+                                <b-list-group-item v-for="item in this.global.userInfo.roles">
+                                    <span class="p-1 mr-3">
+                                        <b-avatar icon="nut" /></span>
+                                    <span class="text-capitalize">{{item.toLowerCase()}}</span>
+                                </b-list-group-item>
+                            </b-list-group>
+                        </b-tab>
+                        <b-tab title="Bid Settings">
+                            <b-list-group>
+                                <b-list-group-item>
+                                    <el-form class="pt-3" label-position="left">
+                                        <el-form-item label="Min Auto Bid" label-width="120px">
+                                            <el-input-number v-model="this.minimumAutoBidPrice" :precision="0" :step="10" :min="10"></el-input-number>
+                                        </el-form-item>
+                                        <el-form-item label="Auto Bid Percent" label-width="120px">
+                                            <el-input-number v-model="this.minimumAutoBidPrice" :precision="0" :step="10" :min="10"></el-input-number>
+                                        </el-form-item>
+                                        <el-form-item label="Auto Bid Budget" label-width="120px">
+                                            <el-input v-model="this.minimumAutoBidPrice" :precision="0" :step="10" :min="10"></el-input>
+                                        </el-form-item>
+                                    </el-form>
+                                </b-list-group-item>
+                            </b-list-group>
+                            <el-col :offset="9" class="p-3">
+                                <el-button @click="handleNewAuction" type="primary" plain>Update Bid Settings</el-button>
+                            </el-col>
+                        </b-tab>
+                    </b-tabs>
+                </b-col>
+            </b-row>
+        </b-container>
+    </el-card>
 </div>
 <div v-else>
     <div>
@@ -94,8 +94,9 @@ export default {
     data() {
         return {
             global: this.$store.state,
-            auctions:[],
-            metaData:[],
+            auctions: [],
+            metaData: [],
+            minimumBid: 0,
             search: {
                 keyword: "",
                 exactMatch: false,

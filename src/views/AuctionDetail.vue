@@ -12,13 +12,14 @@
                     {{ item.description }}
                 </p>
                 <el-form>
-                    <el-row class="pb-4">
-                        <div style="padding: 14px; font-size: small;">
+                    <el-row class="pb-4" style="padding: 14px; font-size: small;">
+                        <div>
                             <b-list-group class="text-md">
                                 <b-list-group-item><b>Opening Price: </b>{{ item.openingPrice }}</b-list-group-item>
                                 <b-list-group-item><b>Current Price : </b>{{ item.currentPrice }}</b-list-group-item>
                             </b-list-group>
                         </div>
+
                     </el-row>
                     <el-row style="display: flex;justify-content: flex-end;">
                         <el-col class="p-2">
@@ -43,6 +44,26 @@
                                 <b-list-group-item :active="index == 1" v-if="itemDetail.userInfos[index-1]">{{ itemDetail.userInfos[index-1].name + " " + itemDetail.userInfos[index-1].surname }} : <b>{{ itemDetail.bids[index-1].price }}</b></b-list-group-item>
                             </b-list-group>
                         </b-card>
+                    </el-row>
+                    <el-row>
+                        <div class="pt-4" v-if="autobid">
+                            <el-card>
+                                <el-form class="pt-3" label-position="left">
+                                    <el-form-item label="Min Auto Bid" label-width="120px">
+                                        <el-input-number v-model="this.minimumAutoBidPrice" :precision="0" :step="10" :min="10"></el-input-number>
+                                    </el-form-item>
+                                    <el-form-item label="Auto Bid Percent" label-width="120px">
+                                        <el-input-number v-model="this.minimumAutoBidPrice" :precision="0" :step="10" :min="10"></el-input-number>
+                                    </el-form-item>
+                                    <el-form-item label="Auto Bid Budget" label-width="120px">
+                                        <el-input v-model="this.minimumAutoBidPrice" :precision="0" :step="10" :min="10"></el-input>
+                                    </el-form-item>
+                                </el-form>
+                                <el-col :offset="6" class="p-3">
+                                    <el-button @click="handleNewAuction" type="primary" plain>Update Bid Settings</el-button>
+                                </el-col>
+                            </el-card>
+                        </div>
                     </el-row>
                 </el-form>
             </b-card>
