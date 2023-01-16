@@ -1,14 +1,10 @@
 <template>
 <div>
     <el-aside width="230px">
-        <el-menu background-color="#545c64" text-color="#fff" active-text-color="#fff" :router="true" >
-            <el-menu-item v-if="isLogged" index="/">
+        <el-menu background-color="#545c64" text-color="#fff" active-text-color="#fff" :router="true" v-if="this.global.loggedIn" >
+            <el-menu-item  index="/home">
                 <i class="el-icon-menu"></i>
                 <span>Home</span>
-            </el-menu-item>
-            <el-menu-item index="/myAuctions">
-                <i class="el-icon-setting"></i>
-                <span>My Auctions</span>
             </el-menu-item>
             <el-menu-item index="/profile">
                 <i class="el-icon-user"></i>
@@ -25,8 +21,7 @@ export default {
     data() {
         ;
         return {
-            global: this.$store.state,            
-            isLogged: localStorage && localStorage.userInfo,
+            global: this.$store.state,     
         };
     },
 };

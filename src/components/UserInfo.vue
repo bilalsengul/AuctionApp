@@ -1,8 +1,6 @@
 <template>
-<div>
-    <el-row class="float-end">
-        <el-button size="small" @click="handleLogout">Logout</el-button>
-    </el-row>
+<div class="float-end">
+    <el-button size="small" @click="handleLogout" class="mb-2">Logout</el-button>
 </div>
 </template>
 
@@ -16,10 +14,8 @@ export default {
     },
     methods: {
         handleLogout() {
-            if (localStorage) {
-                localStorage.clear()
-            }
-            
+            this.global.loggedIn = false
+            this.$router.push('/login')
         }
     }
 }

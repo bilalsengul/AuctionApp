@@ -1,26 +1,12 @@
 <template>
-<div v-if="isLogged">
-    <el-row>
-        <div>
-            <b-alert show variant="danger">
-                <h4 class="alert-heading">Oopss!</h4>
-                <p>
-                    If you receive this error. Please try logging in. If you are logged in but continue to receive errors, you are not authorized to this area.
-                </p>
-                <hr>
-                <p class="mb-0">
-                    Please contact the user admin for detailed information.
-                </p>
-            </b-alert>
-        </div>
-    </el-row>
-</div>
-<div v-else>
+<div v-if="this.$store.state.loggedIn">
+
     <el-row>
         <el-card class="box-card">
-            <b-img v-if="item.image == null" thumbnail fluid src="https://jacksonholeartauction.com/media/images/art_large/ostermiller,_dan,_(1956-_),_empty_saddle,_bronze_7,_8_x_11_x_3.jpg"></b-img>
-            <b-img v-else thumbnail fluid :src="item.image"></b-img>
-            <!-- <img v-else class="preview" :src="rawImage" /> -->
+            <div style="text-align: center;">
+                <b-img v-if="item.image == null" style="width: 300px;" thumbnail fluid src="https://jacksonholeartauction.com/media/images/art_large/ostermiller,_dan,_(1956-_),_empty_saddle,_bronze_7,_8_x_11_x_3.jpg"></b-img>
+                <b-img v-else thumbnail style="width: 300px;" fluid :src="item.image"></b-img>
+            </div>
             <b-card :header="item.name" class="mt-2 ">
                 <p class="card-text mt-2">
                     {{ item.description }}
@@ -30,7 +16,6 @@
                         <div style="padding: 14px; font-size: small;">
                             <b-list-group class="text-md">
                                 <b-list-group-item><b>Opening Price: </b>{{ item.openingPrice }}</b-list-group-item>
-                                <b-list-group-item><b>Current Price : </b>{{ item.currentPrice }}</b-list-group-item>
                                 <b-list-group-item><b>Current Price : </b>{{ item.currentPrice }}</b-list-group-item>
                             </b-list-group>
                         </div>
@@ -64,11 +49,27 @@
         </el-card>
     </el-row>
 </div>
+<div v-else>
+    <el-row>
+        <div>
+            <b-alert show variant="danger">
+                <h4 class="alert-heading">Oopss!</h4>
+                <p>
+                    If you receive this error. Please try logging in. If you are logged in but continue to receive errors, you are not authorized to this area.
+                </p>
+                <hr>
+                <p class="mb-0">
+                    Please contact the user admin for detailed information.
+                </p>
+            </b-alert>
+        </div>
+    </el-row>
+</div>
 </template>
 
 <script>
 export default {
-    name: "auctions",
+    name: "auctionDetail",
     data() {
         return {
             global: this.$store.state,
@@ -88,7 +89,6 @@ export default {
             rawImage: [],
             bidsSize: 0,
             bidPrice: 0,
-            isLogged: false,
 
         };
     },
@@ -98,8 +98,7 @@ export default {
         // starting_bid: "minBid"
     },
     beforeMount() {
-        if (userLoggedIn) console.log(localStorage.userInfo)
-        if (userLoggedIn) {
+        if (this.global.loggedIn) {
             this.updateData();
             this.loadAuction();
             this.loadBids();
@@ -113,24 +112,27 @@ export default {
         },
     },
     mounted() {
-        this.userLoggedIn()
+        this.isLoggedIn()
     },
     methods: {
-        userLoggedIn() {
-            this.isLogged = localStorage && localStorage.userInfo;
+        isLoggedIn() {
+            if (!this.global.loggedIn) {
+                this.$router.push('/login')
+            }
         },
         updateData() {
+            console.log('DetailPage')
             this.auction_id = this.$route.params.id;
             this.url = this.global.apiurl;
         },
         updateBreadcrumb() {
             this.global.breadcrumbPath = [{
-                    path: "/",
+                    path: "/home",
                     name: "Home"
                 },
                 {
-                    path: "/auctions/" + this.auction_id,
-                    name: "Auctions / " + this.item.name
+                    path: "/auctionDetail/" + this.auction_id,
+                    name: "AuctionDetail / " + this.item.name
                 }
             ];
         },
@@ -201,7 +203,6 @@ export default {
             let data = {
                 bidPrice: this.bidPrice
             };
-            console.log("userId", this.global)
             axios({
                 method: 'put',
                 url: this.url + 'item/' + this.auction_id + '/bid-on',

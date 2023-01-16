@@ -1,26 +1,10 @@
 <template>
-<div v-if="!isLogged">
-    <el-row>
-        <div>
-            <b-alert show variant="danger">
-                <h4 class="alert-heading">Oopss!</h4>
-                <p>
-                    If you receive this error. Please try logging in. If you are logged in but continue to receive errors, you are not authorized to this area.
-                </p>
-                <hr>
-                <p class="mb-0">
-                    Please contact the user admin for detailed information.
-                </p>
-            </b-alert>
-        </div>
-    </el-row>
-</div>
-<div v-else>
+<div v-if="this.$store.state.loggedIn">
     <el-row>
         <el-tooltip class="item" effect="dark" content="Search" placement="top-start">
             <el-button v-model="searchIsActive" @click=" searchIsActive = !searchIsActive" circle> <i class="el-icon-search"></i> </el-button>
         </el-tooltip>
-        <el-tooltip class="item" effect="dark" content="Add Item" placement="top-start">
+        <el-tooltip class="item" effect="dark" content="Add Item" placement="top-start" v-if="isAdmin">
             <el-button v-model="searchIsActive" @click="createItem" circle> <i class="el-icon-plus"></i> </el-button>
         </el-tooltip>
         <el-row>
@@ -37,9 +21,11 @@
             <el-switch class="p-3" v-model="search.withExpired" active-text="With Expired">
             </el-switch>
 
-            <el-checkbox label="Sort" v-model="isSortSwitch" @change="sortSwitch"></el-checkbox>
-            <el-switch v-show="isSortSwitch" class="p-3" v-model="search.sortByPriceDescending" active-text="Desc" inactive-text="Asc">
-            </el-switch>
+            <el-radio-group v-model="sortRadio" @change="sortValue">
+                <el-radio-button label="No Sort"></el-radio-button>
+                <el-radio-button label="Asc"></el-radio-button>
+                <el-radio-button label="Desc"></el-radio-button>
+            </el-radio-group>
 
             <el-button class="p-2 float-end m-3" @click="loadAllAuctions" type="primary" plain> Search </el-button>
 
@@ -51,8 +37,8 @@
             <!-- <el-row v-if="auction.visible"> -->
             <el-row>
                 <el-card style="font-size: small;" :body-style="{ padding: '8px' }">
-                    <b-img v-if="auction.image == null" thumbnail fluid src="https://jacksonholeartauction.com/media/images/art_large/ostermiller,_dan,_(1956-_),_empty_saddle,_bronze_7,_8_x_11_x_3.jpg"></b-img>
-                    <b-img v-else thumbnail fluid :src="auction.image"></b-img>
+                    <b-img v-if="auction.image == null"  style="width: 300px;" thumbnail fluid src="https://jacksonholeartauction.com/media/images/art_large/ostermiller,_dan,_(1956-_),_empty_saddle,_bronze_7,_8_x_11_x_3.jpg"></b-img>
+                    <b-img v-else thumbnail   style="width: 300px;" width="300px"  height="300" :src="auction.image"></b-img>
 
                     <el-row>
                         <el-col></el-col>
@@ -69,11 +55,16 @@
 
                         </b-list-group>
                         <div class="bottom clearfix">
-                            <div style="text-align:right;">
-                                <b-button :to="'/auctions/' + auction.id" size="sm">
-                                    <span>Get Details
-                                        <b-avatar size="sm" icon="arrow-right" /></span>
-                                </b-button>
+                            <div style="text-align: center;">
+                                <el-tooltip v-if="isAdmin" class="item" effect="dark" content="Delete Item" placement="top-end">
+                                    <el-button type="danger" icon="el-icon-delete" @click="deleteItem(auction.id)" circle></el-button>
+                                </el-tooltip>
+                                <el-tooltip v-if="isAdmin" class="item" effect="dark" content="Edit Item" placement="top">
+                                    <el-button type="primary" icon="el-icon-edit" @click="editItemDetailPage(auction.id)" circle></el-button>
+                                </el-tooltip>
+                                <el-tooltip class="item" effect="dark" content="Item Detail" placement="top-start">
+                                    <el-button icon="el-icon-search" @click="getItemDetailPage(auction.id)" circle></el-button>
+                                </el-tooltip>
                             </div>
                         </div>
                     </div>
@@ -87,6 +78,23 @@
             <el-button :disabled="((metaData.currentPage - 1)  * metaData.size) + metaData.count == metaData.total" @click="nextPage">Next Page <i class="el-icon-arrow-right"></i></el-button>
         </el-button-group>
     </el-footer>
+
+</div>
+<div v-else>
+    <el-row>
+        <div>
+            <b-alert show variant="danger">
+                <h4 class="alert-heading">Oopss!</h4>
+                <p>
+                    If you receive this error. Please try logging in. If you are logged in but continue to receive errors, you are not authorized to this area.
+                </p>
+                <hr>
+                <p class="mb-0">
+                    Please contact the user admin for detailed information.
+                </p>
+            </b-alert>
+        </div>
+    </el-row>
 </div>
 </template>
 
@@ -108,11 +116,11 @@ export default {
             select: "",
             input: "",
             max: null,
-            isSortSwitch: false,
             min: 0,
+            isAdmin: false,
             rawImage: [],
             metaData: [],
-            isLogged: false,
+            sortRadio: "No Sort",
             endDate: 1674585320,
             search: {
                 keyword: "",
@@ -138,15 +146,67 @@ export default {
         "global.loggedIn": "loadAllAuctions"
     },
     mounted() {
-        this.userLoggedIn()
-        this.updateBreadcrumb()
+        this.isLoggedIn()
+        this.updateBreadcrumb()        
+        this.checkRole()
         this.loadAllAuctions()
 
     },
     methods: {
-        userLoggedIn() {
-            this.isLogged = localStorage && localStorage.userInfo;
+        checkRole(){
+            var roles = this.global.userInfo.roles
+            console.log('roles',this.global.userInfo.roles)
+            this.isAdmin = roles.includes("ADMIN")
+            console.log('isAdmin',this.isAdmin)
         },
+        isLoggedIn() {
+            if (!this.global.loggedIn) {
+                this.$router.push('/login')
+            }
+        },
+        deleteItem(auctionId) {
+            axios({
+                method: 'delete',
+                url: this.global.apiurl + 'item/' + auctionId,
+                header: {
+                    "x-user-id": this.global.userId,
+                },
+            }).then(() => {
+                this.$notify.error({
+                    title: 'Success',
+                    dangerouslyUseHTMLString: true,
+                    message: ' Item deleted successfully'
+                });
+                this.loadAllAuctions();
+            }).catch((err) => {
+                console.log('error', err.response);
+                let errorMessage = err.response.data.message
+                this.$notify.error({
+                    title: 'Error',
+                    dangerouslyUseHTMLString: true,
+                    message: errorMessage
+                });
+            });
+        },
+        getItemDetailPage(auctionId) {
+            let path = '/auctionDetail/' + auctionId
+            this.$router.push(path)
+        },        
+        editItemDetailPage(auctionId) {
+            let path = '/editAuction/' + auctionId
+            this.$router.push(path)
+        },
+        sortValue() {
+            if (this.sortRadio == 'Desc') {
+                this.search.sortByPriceDescending = true
+            } else if (this.sortRadio == 'Asc') {
+                this.search.sortByPriceDescending = false
+            } else {
+                this.search.sortByPriceDescending = null
+            }
+            console.log(this.search.sortByPriceDescending)
+        },
+        
         sortSwitch() {
             if (!this.isSortSwitch) {
                 this.search.sortByPriceDescending = null
@@ -168,7 +228,7 @@ export default {
         },
         updateBreadcrumb() {
             this.global.breadcrumbPath = [{
-                path: "/",
+                path: "/home",
                 name: "Home"
             }];
 
@@ -177,62 +237,41 @@ export default {
             this.$router.push('/newAuction')
         },
         loadAllAuctions() {
-            const loading = this.$loading({
-                lock: true,
-                text: 'Loading',
-                spinner: 'el-icon-loading',
-                background: 'rgba(0, 0, 0, 0.7)'
-            });
-            axios({
-                method: 'post',
-                url: this.global.apiurl + "item/search",
-                data: this.search,
-                header: {
-                    "x-user-id": this.global.userId,
-                },
-            }).then((response) => {
-                console.log(response)
-                this.auctions = response.data.result;
-                this.metaData = response.data;
-                loading.close();
-            }).catch((err) => {
-                console.log('error', err.response);
-                let errorMessage = err.response.data.message
-                this.$notify.error({
-                    title: 'Error',
-                    dangerouslyUseHTMLString: true,
-                    message: errorMessage
+            if (this.global.loggedIn) {
+                const loading = this.$loading({
+                    lock: true,
+                    text: 'Loading',
+                    spinner: 'el-icon-loading',
+                    background: 'rgba(0, 0, 0, 0.7)'
                 });
-            });
+                axios({
+                    method: 'post',
+                    url: this.global.apiurl + "item/search",
+                    data: this.search,
+                    header: {
+                        "x-user-id": this.global.userId,
+                    },
+                }).then((response) => {
+                    console.log(response)
+                    this.auctions = response.data.result;
+                    this.metaData = response.data;
+                    loading.close();
+                }).catch((err) => {
+                    console.log('error', err.response);
+                    let errorMessage = err.response.data.message
+                    this.$notify.error({
+                        title: 'Error',
+                        dangerouslyUseHTMLString: true,
+                        message: errorMessage
+                    });
+                });
 
-            console.log(this.auctions);
-            this.global.auctions = this.auctions;
-            this.getImageRaw()
-
-        },
-
-        async getImageRaw() {
-            this.rawImage = [];
-            for (let i in this.auctions) {
-                console.log("Auction : " + this.auctions[i].id)
-                if (true) {
-                    console.log("burger")
-                    this.rawImage.push(
-                        "https://jacksonholeartauction.com/media/images/art_large/ostermiller,_dan,_(1956-_),_empty_saddle,_bronze_7,_8_x_11_x_3.jpg"
-                    );
-                    console.log(this.rawImage)
-                } else {
-                    console.log("load")
-                    var url = this.global.apiurl + "images/getImageRaw/" + this.auctions[i].id;
-                    var response = await axios.get(url);
-                    this.rawImage.push(
-                        response.data);
-                }
+                console.log(this.auctions);
+                this.global.auctions = this.auctions;
             }
-            console.log("RawImage Lenth: " + this.rawImage.length)
-            console.log("RawImage Lenth: " + this.rawImage)
-            console.log("RawImage Lenth: " + this.auctions)
+
         },
+
     }
 };
 </script>

@@ -19,9 +19,9 @@ const _axios = axios.create(config);
 
 _axios.interceptors.request.use(
   function(config) {
-    if (localStorage.userInfo) { 
-      ;     
-      config.headers.common['x-user-id'] =  localStorage.userInfo.id
+    console.log('axios',store.state.loggedIn)
+    if (store.state.loggedIn) {      
+      config.headers.common['x-user-id'] =  store.state.userId
     }
     return config;
   },

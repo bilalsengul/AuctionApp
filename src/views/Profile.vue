@@ -1,5 +1,5 @@
 <template>
-<div v-if="isLogged">
+<div v-if="this.$store.state.loggedIn">
     <b-container fluid>
         <b-row>
             <b-col offset-md="1">
@@ -9,7 +9,7 @@
         </b-row>
         <b-row align-h="center">
             <b-col cols="4" md="1" class="my-4">
-                <b-img-lazy thumbnail class="rounded" src="https://icon-library.com/images/default-user-icon/default-user-icon-8.jpg" alt="Defaul User Icon">
+                <b-img-lazy   thumbnail class="rounded" src="https://icon-library.com/images/default-user-icon/default-user-icon-8.jpg" alt="Defaul User Icon">
                 </b-img-lazy>
             </b-col>
 
@@ -71,20 +71,21 @@ export default {
     data() {
         return {
             global: this.$store.state,
-            isLogged: false,
         }
     },
-    mounted() {        
-        this.userLoggedIn()
+    mounted() {     
+        this.isLoggedIn();   
         this.updateBreadcrumb()
     },
-    methods: {    
-        userLoggedIn() {
-            this.isLogged = localStorage && localStorage.userInfo;
-        }, 
+    methods: {        
+        isLoggedIn() {
+            if (!this.global.loggedIn) {
+                this.$router.push('/login')
+            }
+        },
         updateBreadcrumb() {
             this.global.breadcrumbPath = [{
-                    path: "/",
+                    path: "/home",
                     name: "Home"
                 },
                 {

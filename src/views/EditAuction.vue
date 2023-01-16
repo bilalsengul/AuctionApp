@@ -1,19 +1,19 @@
 <template>
 <div v-if="this.$store.state.loggedIn">
-    <el-row v-if="this.auctionCreated">
+    <el-row v-if="this.auctionUpdated">
         <el-card class="box-card">
-            <p style="text-align:center;">Your Auction has been created!</p>
+            <p style="text-align:center;">Your Auction has been updated!</p>
         </el-card>
     </el-row>
     <el-row v-else>
         <el-card class="box-card">
 
-            <div class="image-preview" v-if="item.image != ''" style="text-align: center;">
+            <div class="image-preview" v-if="item.image" style="text-align: center;">
                 <div class="image-preview">
-                    <b-img  style="width: 300px; text-align: center;" thumbnail fluid :src="item.image" alt="Image 2"></b-img>
+                    <b-img  style="width: 300px;" thumbnail fluid :src="item.image" ></b-img>
                 </div>
             </div>
-            <b-list-group v-else class="text-md p-3">
+            <b-list-group class="text-md p-3">
                 <b-list-group-item>
                     <div class="file-upload-form">
                         Upload Image:
@@ -34,12 +34,12 @@
                             <el-form-item label="Opening Price" label-width="120px">
                                 <el-input-number v-model="item.openingPrice" :precision="0" :step="10" :min="10"></el-input-number>
                             </el-form-item>
-                            <el-form-item label="Min Auto Bid"  label-width="120px">
+                            <el-form-item label="Min Auto Bid" label-width="120px">
                                 <el-input-number v-model="item.minimumAutoBidPrice" :precision="0" :step="10" :min="10"></el-input-number>
                             </el-form-item>
                             <el-form-item label="End Date" label-width="120px">
                                 <div class="block">
-                                    <el-date-picker v-model="item.auctionEndDate" type="datetime" placeholder="Select date and time" default-time="12:00:00" :picker-options="pickerOptions">
+                                    <el-date-picker v-model="item.auctionEndDate" type="datetime" @change="dateToEpoch" placeholder="Select date and time" :picker-options="pickerOptions">
                                     </el-date-picker>
                                 </div>
                             </el-form-item>
@@ -50,9 +50,9 @@
 
             </b-list-group>
 
-            <el-row v-if="!this.auctionCreated" class="pt-3">
+            <el-row v-if="!this.auctionUpdated" class="pt-3">
                 <el-col :offset="9">
-                    <el-button @click="handleNewAuction" type="primary" plain>Create Auction</el-button>
+                    <el-button @click="handleEditAuction" type="primary" plain>Update Auction</el-button>
                 </el-col>
             </el-row>
         </el-card>
@@ -77,7 +77,7 @@
 
 <script>
 export default {
-    name: "newauction",
+    name: "editauction",
     data() {
         return {
             global: this.$store.state,
@@ -93,7 +93,7 @@ export default {
                 onAuction:true,
                 minimumAutoBidPrice:0
             },
-            auctionCreated: false,
+            auctionUpdated: false,
             pickerOptions: {
                 shortcuts: [{
                     text: 'Today',
@@ -113,13 +113,21 @@ export default {
     },
     mounted() {
         this.isLoggedIn();
+        this.updateData()
         this.updateBreadcrumb();
+        this.loadAuction();
     },
     methods: { 
         isLoggedIn() {
+            console.log('EditPage')
             if (!this.global.loggedIn) {
                 this.$router.push('/login')
             }
+        },
+        updateData() {
+            console.log('DetailPage')
+            this.auction_id = this.$route.params.id;
+            this.url = this.global.apiurl;
         },
         updateBreadcrumb() {
             this.global.breadcrumbPath = [{
@@ -127,26 +135,63 @@ export default {
                     name: "Home"
                 },
                 {
-                    path: "/newAuction",
-                    name: "New Auction"
+                    path: "/editAuction",
+                    name: "Edit Auction"
                 }
             ];
         },
-        async handleNewAuction() {
+        dateToEpoch(){            
+            this.item.auctionEndDate = this.item.auctionEndDate.getTime();
+        },
+        loadAuction() {
+            let loading = this.$loading({
+                    lock: true,
+                    text: 'Loading',
+                    spinner: 'el-icon-loading',
+                    background: 'rgba(0, 0, 0, 0.7)'
+                });
+            axios({
+                method: 'get',
+                url: this.url + 'item/' + this.auction_id,
+            }).then((response) => {
+                this.item = response.data;
+                this.updateBreadcrumb();
+                loading.close()
+
+            }).catch((err) => {
+                loading.close()
+                console.log('error', err.response);
+                let errorMessage = err.response.data.message
+                this.$notify.error({
+                    title: 'Error',
+                    dangerouslyUseHTMLString: true,
+                    message: errorMessage
+                });
+            });;
+        },
+        handleEditAuction() {
             console.log("This is handle new auction");
             console.log(JSON.stringify(this.name));
-
-            var url = this.global.apiurl + "item";
-            this.item.auctionEndDate = this.item.auctionEndDate.getTime();
+            
+            console.log(this.item)
+            var url = this.global.apiurl + "item/" + this.auction_id;
             var body = this.item;
-
+            let loading = this.$loading({
+                    lock: true,
+                    text: 'Loading',
+                    spinner: 'el-icon-loading',
+                    background: 'rgba(0, 0, 0, 0.7)'
+                });
             axios({
-                method: 'post',
+                method: 'put',
                 url: url,
                 data: body,
             }).then((response) => {
                 console.log(response);
-            }).catch((err) => {
+                this.$router.push('/home')
+                loading.close()
+            }).catch((err) => {                
+                loading.close()
                 console.log('error', err.response);
                 let errorMessage = err.response.data.message
                 this.$notify.error({
@@ -156,9 +201,7 @@ export default {
                 });
             });
 
-            // this.uploadImageRaw(response.data.id);
-
-            this.auctionCreated = true;
+            this.auctionUpdated = true;
         },
 
         previewImage: function (event) {

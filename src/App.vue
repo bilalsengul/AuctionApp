@@ -3,14 +3,12 @@
     <el-container>
         <Sidebar />
         <el-main>
-            <el-row>
+            <el-row class="m-0">
                 <el-col :span="12">
                     <Breadcrumb />
                 </el-col>
-                <el-col :offset="4" :span="8">
-                    <el-row v-if="isLogged">
-                        <UserInfo />
-                    </el-row>
+                <el-col :offset="4" :span="8" v-if="this.$store.state.loggedIn">                    
+                    <UserInfo />
                 </el-col>
             </el-row>
             <el-row>
@@ -37,17 +35,12 @@ export default {
     data() {
         return {
             global: this.$store.state,
-            isLogged:false,
         };
     },
     mounted() {
-        this.userLoggedIn()
         this.clearLocalStorage()        
     },
     methods: {
-        userLoggedIn() {
-            this.isLogged = localStorage && localStorage.userInfo;
-        },
         clearLocalStorage() {
             if (localStorage != null) {
                 localStorage.clear()

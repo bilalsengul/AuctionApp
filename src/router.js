@@ -2,21 +2,10 @@ import Vue from 'vue'
 import Router from 'vue-router'
 import Home from './views/Home.vue'
 import NewAuction from './views/NewAuction.vue'
+import EditAuction from './views/EditAuction.vue'
 import Profile from './views/Profile.vue'
-import Auctions from './views/Auctions.vue'
-import MyAuctions from './views/MyAuctions.vue'
+import AuctionDetail from './views/AuctionDetail.vue'
 import Login from './views/Login.vue'
-
-const isNotAuthRoute = route => route.path.indexOf('/login') === -1
-const isLogged = () => localStorage.userInfo != null
-
-const beforeEach =  (to, from, next) => {
-  if (isNotAuthRoute(to) && !isLogged()) {
-    next('/login')
-  } else {
-    next()
-  }
-}
 
 Vue.use(Router)
 
@@ -28,7 +17,7 @@ const routes = [
     component: Login
   },
   {
-    path: '/',
+    path: '/home',
     name: 'home',
     component: Home
   },
@@ -36,6 +25,11 @@ const routes = [
     path: '/newAuction',
     name: 'newauction',
     component: NewAuction
+  },  
+  {
+    path: '/editAuction/:id',
+    name: 'editauction',
+    component: EditAuction
   },
   {
     path: '/profile',
@@ -43,20 +37,13 @@ const routes = [
     component: Profile
   },
   {
-    path: '/auctions/:id',
-    name: 'auctions',
-    component: Auctions
+    path: '/auctionDetail/:id',
+    name: 'auctionDetail',
+    component: AuctionDetail
   },
-  {
-    path: '/myAuctions',
-    name: 'myAuctions',
-    component: MyAuctions
-  }
 ]
 
 const router = Vue.router = new Router({routes:routes});
-
-router.beforeEach(beforeEach);
 
 export default router
 

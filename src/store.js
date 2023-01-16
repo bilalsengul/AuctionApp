@@ -7,7 +7,7 @@ export default new Vuex.Store({
   state: {
     apiurl: "http://localhost:8080/",
     loggedIn: false,
-    breadcrumbPath: [{ path: "/", name: "Home" }],
+    breadcrumbPath: [{ path: "/home", name: "Home" }],
     userInfo: {},
     auctions: [],
     userId: "",
