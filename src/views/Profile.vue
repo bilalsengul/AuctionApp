@@ -9,7 +9,7 @@
         </b-row>
         <b-row align-h="center">
             <b-col cols="4" md="1" class="my-4">
-                <b-img-lazy   thumbnail class="rounded" src="https://icon-library.com/images/default-user-icon/default-user-icon-8.jpg" alt="Defaul User Icon">
+                <b-img-lazy thumbnail class="rounded" src="https://icon-library.com/images/default-user-icon/default-user-icon-8.jpg" alt="Defaul User Icon">
                 </b-img-lazy>
             </b-col>
 
@@ -44,6 +44,29 @@
                             </b-list-group-item>
                         </b-list-group>
                     </b-tab>
+                    <b-tab title="Bid Settings">
+                        <el-table :data="auctions" style="width: 100%" max-height="250">
+                            <el-table-column fixed prop="name" label="Name" width="150">
+                            </el-table-column>
+                            <el-table-column prop="description" label="Name" width="120">
+                            </el-table-column>
+                            <el-table-column prop="minimumAutoBidPrice" label="State" width="120">
+                            </el-table-column>
+                            <el-table-column prop="onAuction" label="City" width="120">
+                            </el-table-column>
+                            <el-table-column prop="openingPrice" label="Address" width="300">
+                            </el-table-column>
+                            <el-table-column prop="auctionEndDate" label="Zip" width="120">
+                            </el-table-column>
+                            <el-table-column fixed="right" label="Operations" width="120">
+                                <template slot-scope="scope">
+                                    <el-button @click.native.prevent="deleteRow(scope.$index, tableData)" type="text" size="small">
+                                        Remove
+                                    </el-button>
+                                </template>
+                            </el-table-column>
+                        </el-table>
+                    </b-tab>
                 </b-tabs>
             </b-col>
         </b-row>
@@ -71,13 +94,25 @@ export default {
     data() {
         return {
             global: this.$store.state,
+            auctions:[],
+            metaData:[],
+            search: {
+                keyword: "",
+                exactMatch: false,
+                searchInDescription: true,
+                sortByPriceDescending: null,
+                withExpired: true,
+                currentPage: 1,
+                size: 2,
+            },
         }
     },
-    mounted() {     
-        this.isLoggedIn();   
+    mounted() {
+        this.isLoggedIn();
         this.updateBreadcrumb()
+        this.loadAllAuctions()
     },
-    methods: {        
+    methods: {
         isLoggedIn() {
             if (!this.global.loggedIn) {
                 this.$router.push('/login')
@@ -93,7 +128,43 @@ export default {
                     name: "Profile"
                 },
             ]
-        }
+        },
+        loadAllAuctions() {
+            if (this.global.loggedIn) {
+                const loading = this.$loading({
+                    lock: true,
+                    text: 'Loading',
+                    spinner: 'el-icon-loading',
+                    background: 'rgba(0, 0, 0, 0.7)'
+                });
+                axios({
+                    method: 'post',
+                    url: this.global.apiurl + "item/search",
+                    data: this.search,
+                    header: {
+                        "x-user-id": this.global.userId,
+                    },
+                }).then((response) => {
+                    console.log(response)
+                    this.auctions = response.data.result;
+                    this.metaData = response.data;
+                    loading.close();
+                }).catch((err) => {
+                    console.log('error', err.response);
+                    let errorMessage = err.response.data.message
+                    this.$notify.error({
+                        title: 'Error',
+                        dangerouslyUseHTMLString: true,
+                        message: errorMessage
+                    });
+                });
+
+                console.log(this.auctions);
+                this.global.auctions = this.auctions;
+            }
+
+        },
+
     }
 }
 </script>
