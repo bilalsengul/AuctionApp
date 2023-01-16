@@ -1,5 +1,5 @@
 <template>
-<div v-if="this.global.loggedIn">
+<div v-if="isLogged">
 
     <el-row>
         <el-col :span="4" v-for="(o, index) in auctionNumber" :key="o" :offset="index > 1 ? 1 : 1">
@@ -57,19 +57,24 @@ export default {
             auctionNumber: 0,
             options: [],
             value: [],
-            rawImage: []
+            rawImage: [],
+            isLogged: false
         };
     },
     watch: {
         value: "loadViaCategory"
     },
-    mounted() {
+    mounted() {        
+        this.userLoggedIn()
         this.updateBreadcrumb();
         // this.loadCategories();
         this.loadMyAuctions();
         //this.getImageRaw();
     },
-    methods: {
+    methods: {    
+        userLoggedIn() {
+            this.isLogged = localStorage && localStorage.userInfo;
+        }, 
         updateBreadcrumb() {
             this.global.breadcrumbPath = [{
                 path: "/",
@@ -77,7 +82,6 @@ export default {
             }];
         },
         async loadMyAuctions() {
-            axios.defaults.headers.common["x-user-id"] = this.global.id;
             console.log("MyAuctions");
             console.log(this.global.apiurl);
             axios({
@@ -85,7 +89,6 @@ export default {
                 url: this.global.apiurl + 'item/' + "788934a4-0aa3-43ac-ae49-72b50e15919c",
                 header: {
                     "x-user-id": "58174c6c-095e-4a89-a79c-992734d1c75a",
-                    "Content-type": "application/json"
                 }
             }).then((response) => {
                 console.log(response);
@@ -94,7 +97,13 @@ export default {
                 this.auctionNumber = response.data.length;
                 this.auctions = response.data;
             }).catch((err) => {
-                console.log(err);
+                console.log('error', err.response);
+                let errorMessage = err.response.data.message
+                this.$notify.error({
+                    title: 'Error',
+                    dangerouslyUseHTMLString: true,
+                    message:  errorMessage
+                });
             });
             for (let i in this.auctions) {
                 this.auctions[i].visible = true;

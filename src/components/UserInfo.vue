@@ -14,10 +14,12 @@ export default {
             global: this.$store.state
         }
     },
-    mounted() {},
     methods: {
         handleLogout() {
-            this.global.loggedIn = false
+            if (localStorage) {
+                localStorage.clear()
+            }
+            
         }
     }
 }

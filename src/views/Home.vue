@@ -1,5 +1,5 @@
 <template>
-<div v-if="!this.global.loggedIn">
+<div v-if="!isLogged">
     <el-row>
         <div>
             <b-alert show variant="danger">
@@ -17,23 +17,62 @@
 </div>
 <div v-else>
     <el-row>
+        <el-tooltip class="item" effect="dark" content="Search" placement="top-start">
+            <el-button v-model="searchIsActive" @click=" searchIsActive = !searchIsActive" circle> <i class="el-icon-search"></i> </el-button>
+        </el-tooltip>
+        <el-tooltip class="item" effect="dark" content="Add Item" placement="top-start">
+            <el-button v-model="searchIsActive" @click="createItem" circle> <i class="el-icon-plus"></i> </el-button>
+        </el-tooltip>
+        <el-row>
+            <el-col></el-col>
+        </el-row>
+        <el-card v-if="searchIsActive" class="col-7">
+
+            <el-input class="col-3 p-2" placeholder="Search" @change="loadAllAuctions" v-model="search.keyword"></el-input>
+
+            <el-switch class="p-3" v-model="search.searchInDescription" active-text="In Description">
+            </el-switch>
+            <el-switch class="p-3" v-model="search.exactMatch" active-text="Exact Match">
+            </el-switch>
+            <el-switch class="p-3" v-model="search.withExpired" active-text="With Expired">
+            </el-switch>
+
+            <el-checkbox label="Sort" v-model="isSortSwitch" @change="sortSwitch"></el-checkbox>
+            <el-switch v-show="isSortSwitch" class="p-3" v-model="search.sortByPriceDescending" active-text="Desc" inactive-text="Asc">
+            </el-switch>
+
+            <el-button class="p-2 float-end m-3" @click="loadAllAuctions" type="primary" plain> Search </el-button>
+
+        </el-card>
+
+    </el-row>
+    <el-row>
         <el-col class="p-3" :span="4" v-for="(auction, index) in auctions" :key="index">
             <!-- <el-row v-if="auction.visible"> -->
             <el-row>
                 <el-card style="font-size: small;" :body-style="{ padding: '8px' }">
-                    <b-img v-if="true" thumbnail fluid src="https://jacksonholeartauction.com/media/images/art_large/ostermiller,_dan,_(1956-_),_empty_saddle,_bronze_7,_8_x_11_x_3.jpg" alt="Image 2"></b-img>
-                    <!-- <img class="preview" :src="rawImage[index]" /> -->
-                    <div style="padding: 14px; font-size: small;" >
-                        <b-list-group class="text-md">
+                    <b-img v-if="auction.image == null" thumbnail fluid src="https://jacksonholeartauction.com/media/images/art_large/ostermiller,_dan,_(1956-_),_empty_saddle,_bronze_7,_8_x_11_x_3.jpg"></b-img>
+                    <b-img v-else thumbnail fluid :src="auction.image"></b-img>
+
+                    <el-row>
+                        <el-col></el-col>
+                    </el-row>
+                    <flip-countdown :labels="label" :deadline="toDate(auction.auctionEndDate)" labelSize="15px" countdownSize="20px"></flip-countdown>
+                    <div style="padding: 14px; font-size: small;">
+
+                        <b-list-group class="text-md pt-2">
+
                             <b-list-group-item><b>Name : </b>{{ auction.name }}</b-list-group-item>
                             <b-list-group-item><b>Descriptions : </b>{{ auction.description }}</b-list-group-item>
                             <b-list-group-item><b>Opening Price: </b>{{ auction.openingPrice }}</b-list-group-item>
-                            <b-list-group-item><b>Current Price : </b>{{ auction.currentPrice }}</b-list-group-item>
+                            <b-list-group-item><b>Current Price: </b>{{ auction.currentPrice }}</b-list-group-item>
+
                         </b-list-group>
                         <div class="bottom clearfix">
                             <div style="text-align:right;">
-                                <b-button :to="'/auctions/' + auction.id" size="sm">Get Details
-                                    <b-avatar size="sm" icon="arrow-right" />
+                                <b-button :to="'/auctions/' + auction.id" size="sm">
+                                    <span>Get Details
+                                        <b-avatar size="sm" icon="arrow-right" /></span>
                                 </b-button>
                             </div>
                         </div>
@@ -42,16 +81,25 @@
             </el-row>
         </el-col>
     </el-row>
+    <el-footer class="footer">
+        <el-button-group>
+            <el-button :disabled="metaData.currentPage == 1" icon="el-icon-arrow-left" @click="previousPage">Previous Page</el-button>
+            <el-button :disabled="((metaData.currentPage - 1)  * metaData.size) + metaData.count == metaData.total" @click="nextPage">Next Page <i class="el-icon-arrow-right"></i></el-button>
+        </el-button-group>
+    </el-footer>
 </div>
 </template>
 
 <script>
+import FlipCountdown from 'vue2-flip-countdown'
+import moment from 'moment'
+
 export default {
     name: "home",
     data() {
         return {
             global: this.$store.state,
-
+            searchIsActive: false,
             currentDate: new Date(),
             auctions: [],
             auctionNumber: 0,
@@ -60,161 +108,109 @@ export default {
             select: "",
             input: "",
             max: null,
+            isSortSwitch: false,
             min: 0,
             rawImage: [],
+            metaData: [],
+            isLogged: false,
+            endDate: 1674585320,
             search: {
-                keyword:"deneme",
-                exactMatch:false,
-                searchInDescription:true,
+                keyword: "",
+                exactMatch: false,
+                searchInDescription: true,
+                sortByPriceDescending: null,
+                withExpired: true,
                 currentPage: 1,
-                size: 10
+                size: 2,
+            },
+            label: {
+                days: 'Day',
+                hours: 'Hour',
+                minutes: 'Min',
+                seconds: 'Sec',
             },
         };
+    },
+    components: {
+        FlipCountdown
     },
     watch: {
         "global.loggedIn": "loadAllAuctions"
     },
     mounted() {
-        this.updateBreadcrumb();
-        this.loadAllAuctions();
+        this.userLoggedIn()
+        this.updateBreadcrumb()
+        this.loadAllAuctions()
+
     },
     methods: {
+        userLoggedIn() {
+            this.isLogged = localStorage && localStorage.userInfo;
+        },
+        sortSwitch() {
+            if (!this.isSortSwitch) {
+                this.search.sortByPriceDescending = null
+            } else {
+                this.search.sortByPriceDescending = this.isSortSwitch
+            }
+        },
+        nextPage() {
+            this.search.currentPage = this.search.currentPage + 1
+            this.loadAllAuctions()
+        },
+        previousPage() {
+            this.search.currentPage = this.search.currentPage - 1
+            this.loadAllAuctions()
+        },
+        toDate(epoch) {
+            let date = epoch == null ? new Date() : new Date(epoch)
+            return moment(date).format("yyyy-MM-DD HH:mm:ss");
+        },
         updateBreadcrumb() {
             this.global.breadcrumbPath = [{
                 path: "/",
                 name: "Home"
             }];
-        },
-        async loadAllAuctions() {
-            console.log("Home Page 1");
-            console.log(this.global.apiurl);
 
+        },
+        createItem() {
+            this.$router.push('/newAuction')
+        },
+        loadAllAuctions() {
+            const loading = this.$loading({
+                lock: true,
+                text: 'Loading',
+                spinner: 'el-icon-loading',
+                background: 'rgba(0, 0, 0, 0.7)'
+            });
             axios({
                 method: 'post',
                 url: this.global.apiurl + "item/search",
                 data: this.search,
                 header: {
-                    "x-user-id": "58174c6c-095e-4a89-a79c-992734d1c75a",
-                    "Content-type": "application/json"
-                }
+                    "x-user-id": this.global.userId,
+                },
             }).then((response) => {
-                console.log(response.data);
-                //this.auctions.push(response.data);
-                this.auctions = response.data;
+                console.log(response)
+                this.auctions = response.data.result;
+                this.metaData = response.data;
+                loading.close();
             }).catch((err) => {
-                console.log(err);
+                console.log('error', err.response);
+                let errorMessage = err.response.data.message
+                this.$notify.error({
+                    title: 'Error',
+                    dangerouslyUseHTMLString: true,
+                    message: errorMessage
+                });
             });
 
-
-            // axios({
-            //     method: 'get',
-            //     url: this.global.apiurl + 'item/' + "6734f3ed-a65e-4560-9c51-3cb01adcee77",
-            //     header: {
-            //         "x-user-id": "58174c6c-095e-4a89-a79c-992734d1c75a",
-            //         "Content-type": "application/json"
-            //     }
-            // }).then((response) => {
-            //     this.auctions.push(response.data);
-            // }).catch((err) => {
-            //     console.log(err);
-            // });
-
             console.log(this.auctions);
-            // for (let i in this.auctions) {
-            //   this.auctions[i].remaining = this.getRemainingTime(
-            //     this.auctions[i].end_time
-            //   );
-            //   if (this.auctions[i].remaining == "Expired")
-            //     this.auctions[i].visible = false;
-            //   else {
-            //     if (this.global.loggedIn) {
-            //       if (this.global.userInfo.id == this.auctions[i].seller_id) {
-            //         this.auctions[i].visible = false;
-            //       } else this.auctions[i].visible = true;
-            //     } else this.auctions[i].visible = true;
-            //   }
-            // }
             this.global.auctions = this.auctions;
             this.getImageRaw()
+
         },
 
-        getRemainingTime(end_time) {
-            var seconds = (new Date(end_time) - this.calcTime(6)) / 1000;
-            if (seconds < 0) return "Expired";
-
-            var sec_num = parseInt(seconds);
-            var days = Math.floor(sec_num / 86400);
-            var hours = Math.floor((sec_num - days * 86400) / 3600);
-            var minutes = Math.floor((sec_num - days * 86400 - hours * 3600) / 60);
-            var seconds = sec_num - days * 86400 - hours * 3600 - minutes * 60;
-
-            if (days < 10) {
-                days = "0" + days;
-            }
-            if (hours < 10) {
-                hours = "0" + hours;
-            }
-            if (minutes < 10) {
-                minutes = "0" + minutes;
-            }
-            if (seconds < 10) {
-                seconds = "0" + seconds;
-            }
-            return days + "d " + hours + "h " + minutes + "m";
-        },
-        calcTime(offset) {
-            var d = new Date();
-            var utc = d.getTime() + d.getTimezoneOffset() * 60000;
-            return new Date(utc + 3600000 * offset);
-        },
-        searchViaPrice() {
-            console.log(this.select)
-            if (this.min == 0 && this.max == 0) {
-                this.loadAllAuctions()
-                return
-            }
-            this.callSearch("auctions/searchAuctionViaPrice/" + this.min + "/" + this.max)
-        },
-        searchVia() {
-            console.log(this.select)
-            if (this.input == "") {
-                this.loadAllAuctions()
-                return;
-            }
-            if (this.select == "Category") {
-                this.callSearch("auctions/searchAuctionViaCategory/" + this.input)
-            } else if (this.select == "Country") {
-                this.callSearch("auctions/searchAuctionViaCountry/" + this.input)
-            } else if (this.select == "Text") {
-                this.callSearch("auctions/searchAuctionViaFreeText/" + this.input)
-            }
-        },
-        async callSearch(param) {
-            console.log(param)
-
-            var url = this.global.apiurl + param;
-
-            var response = await axios.get(url);
-            this.auctionNumber = response.data.length;
-            this.auctions = response.data;
-
-            for (let i in this.auctions) {
-                this.auctions[i].visible = false;
-                this.auctions[i].remaining = this.getRemainingTime(this.auctions[i].end_time);
-                if (this.auctions[i].remaining == "Expired")
-                    this.auctions[i].visible = false;
-                else {
-                    if (this.global.loggedIn) {
-                        if (this.global.userInfo.id == this.auctions[i].seller_id) {
-                            this.auctions[i].visible = false;
-                        } else this.auctions[i].visible = true;
-                    } else this.auctions[i].visible = true;
-                    console.log(JSON.stringify(this.auctions[i]))
-                }
-            }
-            this.global.auctions = this.auctions;
-            this.getImageRaw()
-        },
         async getImageRaw() {
             this.rawImage = [];
             for (let i in this.auctions) {
@@ -242,6 +238,39 @@ export default {
 </script>
 
 <style>
+.flip-card__top,
+.flip-card__bottom,
+.flip-card__back-bottom,
+.flip-card__back::before,
+.flip-card__back::after {
+    color: #fff !important;
+}
+
+.flip-card__top-4digits,
+.flip-card__bottom-4digits,
+.flip-card__back-bottom-4digits,
+.flip-card__back-4digits::before,
+.flip-card__back-4digits::after {
+    color: #fff !important;
+}
+
+.flip-card__top-4digits,
+.flip-card__bottom-4digits,
+.flip-card__back-bottom-4digits,
+.flip-card__back-4digits::before,
+.flip-card__back-4digits::after {
+    color: rgb(156, 156, 156) !important;
+}
+
+.footer {
+
+    position: fixed;
+    left: 0;
+    bottom: 0;
+    width: 100%;
+    text-align: center;
+}
+
 .time {
     font-size: 13px;
     color: #999;

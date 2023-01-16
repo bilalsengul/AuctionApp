@@ -1,5 +1,5 @@
 <template>
-<div v-if="this.global.loggedIn">
+<div v-if="isLogged">
     <b-container fluid>
         <b-row>
             <b-col offset-md="1">
@@ -70,13 +70,18 @@ export default {
     name: 'profile',
     data() {
         return {
-            global: this.$store.state
+            global: this.$store.state,
+            isLogged: false,
         }
     },
-    mounted() {
+    mounted() {        
+        this.userLoggedIn()
         this.updateBreadcrumb()
     },
-    methods: {
+    methods: {    
+        userLoggedIn() {
+            this.isLogged = localStorage && localStorage.userInfo;
+        }, 
         updateBreadcrumb() {
             this.global.breadcrumbPath = [{
                     path: "/",

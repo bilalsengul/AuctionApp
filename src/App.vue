@@ -8,8 +8,9 @@
                     <Breadcrumb />
                 </el-col>
                 <el-col :offset="4" :span="8">
-                    <Login v-if="!global.loggedIn" />
-                    <UserInfo v-else />
+                    <el-row v-if="isLogged">
+                        <UserInfo />
+                    </el-row>
                 </el-col>
             </el-row>
             <el-row>
@@ -23,26 +24,35 @@
 
 <script>
 import Sidebar from "./components/Sidebar.vue";
-import Login from "./components/Login.vue";
 import Breadcrumb from "./components/Breadcrumb.vue";
 import UserInfo from "./components/UserInfo.vue";
 
 export default {
     name: "app",
     components: {
-        Login,
         Sidebar,
         Breadcrumb,
         UserInfo,
     },
     data() {
         return {
-            global: this.$store.state
+            global: this.$store.state,
+            isLogged:false,
         };
     },
-    mounted() {},
+    mounted() {
+        this.userLoggedIn()
+        this.clearLocalStorage()        
+    },
     methods: {
-
+        userLoggedIn() {
+            this.isLogged = localStorage && localStorage.userInfo;
+        },
+        clearLocalStorage() {
+            if (localStorage != null) {
+                localStorage.clear()
+            }
+        },
     }
 };
 </script>

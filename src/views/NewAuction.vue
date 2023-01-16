@@ -1,45 +1,64 @@
 <template>
-<div v-if="this.global.loggedIn">
+<div v-if="isLogged">
     <el-row v-if="this.auctionCreated">
         <el-card class="box-card">
             <p style="text-align:center;">Your Auction has been created!</p>
         </el-card>
     </el-row>
     <el-row v-else>
-        <el-col class="column" :span="12">
-            <el-form>
-                <el-form-item label="Item Name" label-width="120px">
-                    <el-input v-model="item.name"></el-input>
-                </el-form-item>
-                <el-form-item label="Description" label-width="120px">
-                    <el-input type="textarea" :rows="4" placeholder="Item Description" v-model="item.description"></el-input>
-                </el-form-item>
-                <el-form-item label="Opening Price" label-width="120px">
-                    <el-input-number v-model="item.openingPrice" :precision="1" :step="0.1" :min="0"></el-input-number>
-                </el-form-item>
-                <el-form-item label="End Date" label-width="120px">
-                    <el-date-picker type="date" placeholder="Pick a date" v-model="item.auctionEndDate" style="width: 100%;"></el-date-picker>
-                    <el-time-picker placeholder="Pick a time" v-model="item.auctionEndDate" style="width: 100%;"></el-time-picker>
-                </el-form-item>
-            </el-form>
-            <div>
-                <div class="file-upload-form">
-                    Upload an image file:
-                    <input type="file" name="myFile" @change="previewImage" accept="image/*" />
-                </div>
-                <!-- <div class="image-preview" v-if="imagePath.length > 0"> -->
+        <el-card class="box-card">
+
+            <div class="image-preview" v-if="item.image != ''">
                 <div class="image-preview">
-                    <img class="preview" :src="item.imagePath" />
+                    <b-img thumbnail fluid :src="item.image" alt="Image 2"></b-img>
                 </div>
             </div>
-        </el-col>
+            <b-list-group v-else class="text-md p-3">
+                <b-list-group-item>
+                    <div class="file-upload-form">
+                        Upload Image:
+                        <input type="file" name="myFile" @change="previewImage" accept="image/*" />
+                    </div>
+                </b-list-group-item>
+            </b-list-group>
+            <!-- <b-img v-if="true" thumbnail fluid src="https://jacksonholeartauction.com/media/images/art_large/ostermiller,_dan,_(1956-_),_empty_saddle,_bronze_7,_8_x_11_x_3.jpg" alt="Image 2"></b-img> -->
+            <b-list-group class="text-md p-3">
+                <b-list-group-item>
+                    <el-col class="column">
+                        <el-form class="pt-3" label-position="left">
+                            <el-form-item label="Item Name" label-pos label-width="120px">
+                                <el-input v-model="item.name" placeholder="Item Name"></el-input>
+                            </el-form-item>
+                            <el-form-item label="Description" label-width="120px">
+                                <el-input type="textarea" :rows="4" placeholder="Item Description" v-model="item.description"></el-input>
+                            </el-form-item>
+                            <el-form-item label="Opening Price" label-width="120px">
+                                <el-input-number v-model="item.openingPrice" :precision="0" :step="10" :min="10"></el-input-number>
+                            </el-form-item>
+                            <el-form-item label="Minimum Auto Bid Price  Price" label-width="120px">
+                                <el-input-number v-model="item.minimumAutoBidPrice" :precision="0" :step="10" :min="10"></el-input-number>
+                            </el-form-item>
+                            <el-form-item label="End Date" label-width="120px">
+                                <div class="block">
+                                    <el-date-picker v-model="item.auctionEndDate" type="datetime" placeholder="Select date and time" default-time="12:00:00" :picker-options="pickerOptions">
+                                    </el-date-picker>
+                                </div>
+                            </el-form-item>
+                        </el-form>
+
+                    </el-col>
+                </b-list-group-item>
+
+            </b-list-group>
+
+            <el-row v-if="!this.auctionCreated" class="pt-3">
+                <el-col :offset="9">
+                    <el-button @click="handleNewAuction" type="primary" plain>Create Auction</el-button>
+                </el-col>
+            </el-row>
+        </el-card>
     </el-row>
 
-    <el-row v-if="!this.auctionCreated">
-        <el-col :offset="9">
-            <el-button type="primary" @click="handleNewAuction">Create Auction</el-button>
-        </el-col>
-    </el-row>
 </div>
 <div v-else>
     <div>
@@ -66,25 +85,42 @@ export default {
             onAuction: false,
             cratedDate: "",
             updatedDate: "",
-
+            isLogged:false,
             item: {
                 name: "",
-                imagePath: "C:\Users\AnastasiaBayraktar\Pictures\Screenshots\response.png",
+                image: "",
                 description: "",
-                openingPrice: 0,
+                openingPrice:0,
                 auctionEndDate: "",
+                onAuction:true,
+                minimumAutoBidPrice:0
             },
-            imageLoaded: false,
-            auctionCreated: false
+            auctionCreated: false,
+            pickerOptions: {
+                shortcuts: [{
+                    text: 'Today',
+                    onClick(picker) {
+                        picker.$emit('pick', new Date());
+                    }
+                }, {
+                    text: 'Quick Auction',
+                    onClick(picker) {
+                        const date = new Date();
+                        date.setTime(date.getTime() + 300 * 1000);
+                        picker.$emit('pick', date);
+                    }
+                }]
+            },
         };
     },
     mounted() {
         this.updateBreadcrumb();
+        this.userLoggedIn()
     },
-    watch: {
-        imagePath: "imagePathLoaded"
-    },
-    methods: {
+    methods: {    
+        userLoggedIn() {
+            this.isLogged = localStorage && localStorage.userInfo;
+        }, 
         updateBreadcrumb() {
             this.global.breadcrumbPath = [{
                     path: "/",
@@ -101,6 +137,7 @@ export default {
             console.log(JSON.stringify(this.name));
 
             var url = this.global.apiurl + "item";
+            this.item.auctionEndDate = this.item.auctionEndDate.getTime();
             var body = this.item;
 
             axios({
@@ -110,20 +147,13 @@ export default {
             }).then((response) => {
                 console.log(response);
             }).catch((err) => {
-                console.log(err);
-            });
-
-            var url = this.global.apiurl + "image/upload";
-            var body = this.imagePath;
-
-            axios({
-                method: 'post',
-                url: url,
-                data: body,
-            }).then((response) => {
-                console.log(response);
-            }).catch((err) => {
-                console.log(err);
+                console.log('error', err.response);
+                let errorMessage = err.response.data.message
+                this.$notify.error({
+                    title: 'Error',
+                    dangerouslyUseHTMLString: true,
+                    message:  errorMessage
+                });
             });
 
             // this.uploadImageRaw(response.data.id);
@@ -136,22 +166,18 @@ export default {
             if (input.files && input.files[0]) {
                 var reader = new FileReader();
                 reader.onload = e => {
-                    this.imagePath = e.target.result;
-                    console.log(this.imagePath);
+                    this.item.image = e.target.result;
+                    console.log(this.item.image);
                 };
                 console.log(input.files[0]);
                 reader.readAsDataURL(input.files[0]);
-                
-                
+
             }
         },
         async getImageRaw(id) {
             var url = this.global.apiurl + "images/getImageRaw/" + id;
             var response = await axios.get(url);
             this.rawImage = response.data;
-        },
-        imagePathLoaded() {
-            this.imageLoaded = true;
         },
         async uploadImageRaw(newName) {
             console.log("image loaded");
@@ -164,11 +190,11 @@ export default {
 
             var response = await axios.post(
                 url, {
-                    imagePath: this.imagePath
+                    image: this.image
                 },
                 config
             );
-            console.log(this.imagePath.length);
+            console.log(this.image.length);
             console.log(JSON.stringify(response.data));
         }
     }
