@@ -2,7 +2,8 @@ package com.sengul.biddingapinew.domain.service.implementation;
 
 import com.sengul.biddingapinew.application.exception.BadRequestException;
 import com.sengul.biddingapinew.application.exception.UserNotFoundException;
-import com.sengul.biddingapinew.application.request.UpdateUserRequest;
+import com.sengul.biddingapinew.application.request.user.UpdateUserRequest;
+import com.sengul.biddingapinew.domain.model.Item;
 import com.sengul.biddingapinew.domain.model.User;
 import com.sengul.biddingapinew.domain.service.UserService;
 import com.sengul.biddingapinew.infrastructure.repository.UserRepository;
@@ -72,4 +73,14 @@ public class UserServiceImpl implements UserService {
         return user;
     }
 
+    @Override
+    public void addNewItem(String id, Item item) throws UserNotFoundException {
+        log.info("Started handling request= AddNewItem(id: " + id + ", item:" + item + ")");
+
+        User user = this.get(id);
+        user.addItem(item);
+        userRepository.save(user);
+
+        log.info("Finished handling request= AddNewItem(id: " + id + ", item:" + item + ")");
+    }
 }

@@ -3,8 +3,10 @@ package com.sengul.biddingapinew.domain.service.implementation;
 import com.sengul.biddingapinew.application.exception.UserNotFoundException;
 import com.sengul.biddingapinew.application.request.global.LoginRequest;
 import com.sengul.biddingapinew.application.response.LoginResponse;
+import com.sengul.biddingapinew.domain.model.Item;
 import com.sengul.biddingapinew.domain.model.User;
 import com.sengul.biddingapinew.domain.service.LoginService;
+import com.sengul.biddingapinew.infrastructure.repository.ItemRepository;
 import com.sengul.biddingapinew.infrastructure.repository.UserRepository;
 import com.sengul.biddingapinew.infrastructure.utils.enums.UserRole;
 import lombok.extern.slf4j.Slf4j;
@@ -18,9 +20,11 @@ import java.util.Optional;
 public class LoginServiceImpl implements LoginService {
 
     private final UserRepository userRepository;
+    private final ItemRepository itemRepository;
 
-    public LoginServiceImpl(UserRepository userRepository) {
+    public LoginServiceImpl(UserRepository userRepository, ItemRepository itemRepository) {
         this.userRepository = userRepository;
+        this.itemRepository = itemRepository;
         prepareInitialData();
     }
 
@@ -81,9 +85,28 @@ public class LoginServiceImpl implements LoginService {
                 "regular2@scopic.com",
                 List.of(UserRole.REGULAR)
         );
+        Item item = new Item(
+                "DenemeItem1",
+                "DenemeItem1Description",
+                100.0
+        );
+        Item item2 = new Item(
+                "DenemeItem2",
+                "DenemeItem2Description",
+                125.0
+        );
+        Item item3 = new Item(
+                "DenemeItem3",
+                "DenemeItem3Description",
+                150.0
+        );
         userRepository.deleteAll();
+        itemRepository.deleteAll();
         List<User> users = List.of(admin, admin2, regular, regular2);
+        List<Item> items = List.of(item, item2, item3);
         userRepository.saveAll(users);
+        itemRepository.saveAll(items);
         users.forEach(x -> System.out.println("UserName: " + x.getName() + " ID: " + x.getId()));
+        items.forEach(y -> System.out.println("ItemName: " + y.getName() + " ID: " + y.getId()));
     }
 }

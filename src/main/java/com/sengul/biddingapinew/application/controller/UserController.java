@@ -2,7 +2,7 @@ package com.sengul.biddingapinew.application.controller;
 
 import com.sengul.biddingapinew.application.exception.BadRequestException;
 import com.sengul.biddingapinew.application.exception.UserNotFoundException;
-import com.sengul.biddingapinew.application.request.UpdateUserRequest;
+import com.sengul.biddingapinew.application.request.user.UpdateUserRequest;
 import com.sengul.biddingapinew.domain.model.User;
 import com.sengul.biddingapinew.domain.service.UserService;
 import jakarta.validation.Valid;

@@ -7,6 +7,7 @@ import lombok.NoArgsConstructor;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
@@ -23,6 +24,7 @@ public class User {
     private String password;
     private String email;
     private List<UserRole> roles;
+    private List<Item> items;
     private Long createdDate;
     private Long updatedDate;
 
@@ -34,7 +36,15 @@ public class User {
         this.surname = surname;
         this.email = email;
         this.roles = roles;
+        this.items = null;
         this.createdDate = System.currentTimeMillis();
         this.updatedDate = System.currentTimeMillis();
+    }
+
+    public void addItem(Item item) {
+        if (this.items == null) {
+            this.items = new ArrayList<>();
+        }
+        this.items.add(item);
     }
 }

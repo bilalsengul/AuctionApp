@@ -1,4 +1,4 @@
-package com.sengul.biddingapinew.application.request;
+package com.sengul.biddingapinew.application.request.user;
 
 import com.mongodb.lang.Nullable;
 import jakarta.validation.constraints.NotBlank;
