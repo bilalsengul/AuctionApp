@@ -80,6 +80,10 @@ public class UserServiceImpl implements UserService {
                 user.setBalance(request.getBalance());
             }
 
+            if (request.getItems() != null) {
+                user.setItems(request.getItems());
+            }
+
             if (request.getAutoBidBalance() != null) {
                 user.setAutoBidBalance(request.getAutoBidBalance());
             }

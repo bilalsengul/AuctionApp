@@ -97,6 +97,10 @@ public class ItemServiceImpl implements ItemService {
             item.setImage(request.getImage());
         }
 
+        if (request.getImage() != null) {
+            item.setImage(request.getImage());
+        }
+
         if (request.getOpeningPrice() != null) {
             item.setOpeningPrice(request.getOpeningPrice());
             item.setCurrentPrice(request.getOpeningPrice());

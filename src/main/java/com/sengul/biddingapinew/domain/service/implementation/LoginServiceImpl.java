@@ -6,6 +6,7 @@ import com.sengul.biddingapinew.application.response.LoginResponse;
 import com.sengul.biddingapinew.domain.model.Item;
 import com.sengul.biddingapinew.domain.model.User;
 import com.sengul.biddingapinew.domain.service.LoginService;
+import com.sengul.biddingapinew.infrastructure.repository.BidRepository;
 import com.sengul.biddingapinew.infrastructure.repository.ItemRepository;
 import com.sengul.biddingapinew.infrastructure.repository.UserRepository;
 import com.sengul.biddingapinew.infrastructure.utils.enums.UserRole;
@@ -21,10 +22,12 @@ public class LoginServiceImpl implements LoginService {
 
     private final UserRepository userRepository;
     private final ItemRepository itemRepository;
+    private final BidRepository bidRepository;
 
-    public LoginServiceImpl(UserRepository userRepository, ItemRepository itemRepository) {
+    public LoginServiceImpl(UserRepository userRepository, ItemRepository itemRepository, BidRepository bidRepository) {
         this.userRepository = userRepository;
         this.itemRepository = itemRepository;
+        this.bidRepository = bidRepository;
         prepareInitialData();
     }
 
@@ -110,6 +113,7 @@ public class LoginServiceImpl implements LoginService {
         );
         userRepository.deleteAll();
         itemRepository.deleteAll();
+        bidRepository.deleteAll();
         List<User> users = List.of(admin, admin2, regular, regular2);
         List<Item> items = List.of(item, item2, item3);
         userRepository.saveAll(users);

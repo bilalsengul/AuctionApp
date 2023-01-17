@@ -31,7 +31,7 @@ public class ItemController {
 
     private final ItemService itemService;
 
-    private final AutoBidDefinitionService autoBidDefintionService;
+    private final AutoBidDefinitionService autoBidDefinitionService;
 
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
@@ -47,7 +47,7 @@ public class ItemController {
 
     @PutMapping("/{id}")
     @ResponseStatus(HttpStatus.ACCEPTED)
-    public Item update(@NotNull @NotBlank @PathVariable String id, @RequestBody UpdateItemRequest request) throws ItemNotFoundException, BadRequestException {
+    public Item update(@NotNull @NotBlank @PathVariable String id, @Valid @RequestBody UpdateItemRequest request) throws ItemNotFoundException, BadRequestException {
         return itemService.update(id, request);
     }
 
@@ -80,6 +80,6 @@ public class ItemController {
     @ResponseStatus(HttpStatus.ACCEPTED)
     public void autoBid(@NotNull @NotBlank @PathVariable String id, @Valid @RequestBody AutoBidOnItemRequest request) throws BadRequestException, ItemNotFoundException {
         request.setUserId(MDC.get(HttpHeaders.X_USER_ID.key()));
-        autoBidDefintionService.create(id, request);
+        autoBidDefinitionService.create(id, request);
     }
 }

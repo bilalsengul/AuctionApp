@@ -1,5 +1,6 @@
 package com.sengul.biddingapinew.application.exception.handler;
 
+import com.sengul.biddingapinew.application.exception.BadRequestException;
 import com.sengul.biddingapinew.application.exception.NotFoundException;
 import com.sengul.biddingapinew.application.response.Response;
 import com.sengul.biddingapinew.application.response.builder.ResponseBuilder;
@@ -20,6 +21,11 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
 
     @ExceptionHandler({NotFoundException.class})
     public ResponseEntity<Response<Object>> handleNotFoundException(NotFoundException ex) {
+        return handleExceptionWithoutStackTrace(ex);
+    }
+
+    @ExceptionHandler({BadRequestException.class})
+    public ResponseEntity<Response<Object>> handleBadRequestException(BadRequestException ex) {
         return handleExceptionWithoutStackTrace(ex);
     }
 
