@@ -24,9 +24,6 @@ These instructions will help you set up and run the Auction App on your local ma
 ### Prerequisites
 - Git
 - Docker and Docker Compose
-- Java (for back-end)
-- Node.js and npm (for front-end)
-- Maven (for building and running the Java back-end)
 
 ### Installing
 
@@ -36,7 +33,7 @@ These instructions will help you set up and run the Auction App on your local ma
 git clone https://github.com/bilalsengul/AuctionApp.git
 ```
 
-&nbsp;3. Start the backend and frontend services using Docker Compose:
+&nbsp;2. Start the backend and frontend services using Docker Compose:
 
 ```bash
 docker-compose up
