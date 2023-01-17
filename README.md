@@ -1,4 +1,3 @@
-
 # AuctionApp
 The Auction App is a web application that allows users to bid on antique items and view their bid history. The application allows regular users to view the list of available items, view the details of a single item, and place bids on items. It also allows administrator users to add, modify, and remove items.
 The front-end of the application is built using Vue.js and the back-end is built using Java.
@@ -19,36 +18,9 @@ The Auction App allows users to make bids on items, view items they have bid on,
 - To log in and out, use the navigation bar at the top of the page.
 
 ## Getting Started
-<<<<<<< Updated upstream
 
 These instructions will help you set up and run the Auction App on your local machine.
 
-### Prerequisites
-- Git
-- Docker and Docker Compose
-- Java (for back-end)
-- Node.js and npm (for front-end)
-- Maven (for building and running the Java back-end)
-
-### Installing
-
-&nbsp; 1. Clone the repository to your local machine:
-=======
->>>>>>> Stashed changes
-
-These instructions will help you set up and run the Auction App on your local machine.
-
-<<<<<<< Updated upstream
-&nbsp;2. Navigate to the repository directory:
-
-```bash
-cd AuctionApp
-```
-&nbsp;3. Start the backend and frontend services using Docker Compose:
-
-```bash
-docker-compose -f docker-compose.yaml -f Client/docker-compose.yaml up
-=======
 ### Prerequisites
 - Git
 - Docker and Docker Compose
@@ -64,11 +36,10 @@ docker-compose -f docker-compose.yaml -f Client/docker-compose.yaml up
 git clone https://github.com/bilalsengul/AuctionApp.git
 ```
 
-&nbsp;2. Start the backend and frontend services using Docker Compose:
+&nbsp;3. Start the backend and frontend services using Docker Compose:
 
 ```bash
 docker-compose up
->>>>>>> Stashed changes
 ```
 
 
