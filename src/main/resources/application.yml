@@ -1,0 +1,9 @@
+spring:
+  data:
+    mongodb:
+      authentication-database: admin
+      host: host.docker.internal
+      port: 27017
+      database: biddingapi
+      username: rootuser
+      password: rootpass

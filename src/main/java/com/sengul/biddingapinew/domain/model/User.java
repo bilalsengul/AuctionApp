@@ -1,0 +1,40 @@
+package com.sengul.biddingapinew.domain.model;
+
+import com.sengul.biddingapinew.infrastructure.utils.enums.UserRole;
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+import org.springframework.data.annotation.Id;
+import org.springframework.data.mongodb.core.mapping.Document;
+
+import java.util.List;
+import java.util.UUID;
+
+@Document
+@Data
+@AllArgsConstructor
+@NoArgsConstructor
+public class User {
+    @Id
+    private String id;
+    private String username;
+    private String name;
+    private String surname;
+    private String password;
+    private String email;
+    private List<UserRole> roles;
+    private Long createdDate;
+    private Long updatedDate;
+
+    public User(String username, String password, String name, String surname, String email, List<UserRole> roles) {
+        this.id = UUID.randomUUID().toString();
+        this.username = username;
+        this.password = password;
+        this.name = name;
+        this.surname = surname;
+        this.email = email;
+        this.roles = roles;
+        this.createdDate = System.currentTimeMillis();
+        this.updatedDate = System.currentTimeMillis();
+    }
+}
