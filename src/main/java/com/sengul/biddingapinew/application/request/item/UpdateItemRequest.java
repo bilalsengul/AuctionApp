@@ -18,7 +18,7 @@ public class UpdateItemRequest {
 
     @Nullable
     @NotBlank(message = "imagePath cannot be empty string")
-    private String imagePath;
+    private String image;
 
     @Nullable
     @NotBlank(message = "description cannot be empty string")
@@ -40,8 +40,12 @@ public class UpdateItemRequest {
 
     public boolean anyFullNonUpdatableFieldWhileOnAuction() {
         return (this.name != null && !this.name.isBlank())
-                || (this.imagePath != null && !this.imagePath.isBlank())
+                || (this.image != null && !this.image.isBlank())
                 || (this.description != null && !this.description.isBlank())
                 || (this.openingPrice != null);
+    }
+
+    public static UpdateItemRequest currentPriceRequest(Double currentPrice) {
+        return new UpdateItemRequest(null, null, null, null, currentPrice, null, null);
     }
 }

@@ -23,18 +23,22 @@ public class User {
     private String surname;
     private String password;
     private String email;
+    private Double budget;
+    private Double balance;
     private List<UserRole> roles;
     private List<Item> items;
     private Long createdDate;
     private Long updatedDate;
 
-    public User(String username, String password, String name, String surname, String email, List<UserRole> roles) {
+    public User(String username, String password, String name, String surname, String email, Double budget, List<UserRole> roles) {
         this.id = UUID.randomUUID().toString();
         this.username = username;
         this.password = password;
         this.name = name;
         this.surname = surname;
         this.email = email;
+        this.budget = budget;
+        this.balance = budget;
         this.roles = roles;
         this.items = null;
         this.createdDate = System.currentTimeMillis();

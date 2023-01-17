@@ -2,12 +2,19 @@ package com.sengul.biddingapinew.domain.service.implementation;
 
 import com.sengul.biddingapinew.application.exception.BadRequestException;
 import com.sengul.biddingapinew.application.exception.ItemNotFoundException;
+import com.sengul.biddingapinew.application.exception.UserNotFoundException;
+import com.sengul.biddingapinew.application.request.item.BidOnItemRequest;
 import com.sengul.biddingapinew.application.request.item.CreateItemRequest;
 import com.sengul.biddingapinew.application.request.item.SearchItemRequest;
 import com.sengul.biddingapinew.application.request.item.UpdateItemRequest;
+import com.sengul.biddingapinew.application.request.user.UpdateUserRequest;
 import com.sengul.biddingapinew.application.response.SearchItemResponse;
+import com.sengul.biddingapinew.domain.model.Bid;
 import com.sengul.biddingapinew.domain.model.Item;
+import com.sengul.biddingapinew.domain.model.User;
 import com.sengul.biddingapinew.domain.service.ItemService;
+import com.sengul.biddingapinew.domain.service.UserService;
+import com.sengul.biddingapinew.infrastructure.repository.BidRepository;
 import com.sengul.biddingapinew.infrastructure.repository.ItemRepository;
 import jakarta.validation.constraints.NotNull;
 import lombok.RequiredArgsConstructor;
@@ -18,10 +25,12 @@ import org.springframework.data.domain.Sort;
 import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.data.mongodb.core.query.Query;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
+
+import static java.util.stream.Collectors.groupingBy;
 
 @Service
 @RequiredArgsConstructor
@@ -29,6 +38,10 @@ import java.util.Optional;
 public class ItemServiceImpl implements ItemService {
 
     private final ItemRepository itemRepository;
+
+    private final BidRepository bidRepository;
+
+    private final UserService userService;
 
     private final MongoTemplate mongoTemplate;
 
@@ -79,8 +92,8 @@ public class ItemServiceImpl implements ItemService {
             item.setDescription(request.getDescription());
         }
 
-        if (request.getImagePath() != null) {
-            item.setImage(request.getImagePath());
+        if (request.getImage() != null) {
+            item.setImage(request.getImage());
         }
 
         if (request.getOpeningPrice() != null) {
@@ -181,6 +194,115 @@ public class ItemServiceImpl implements ItemService {
 
         log.info("Finished handling request= " + request);
         return response;
+    }
+
+    @Override
+    public List<Bid> getBids(String id) {
+        log.info("Started handling request= " + id);
+
+        List<Bid> result = bidRepository.findByItemId(id);
+
+        log.info("Finished handling request= " + id);
+        return result;
+    }
+
+    @Override
+    public void bidOn(String id, BidOnItemRequest request) throws ItemNotFoundException, BadRequestException, UserNotFoundException {
+        log.info("Started handling request= " + request);
+
+        User user = userService.get(request.getUserId());
+
+        Item item = this.get(id);
+
+        validateBidOn(item, request);
+
+        List<Bid> bidsOnItem = this.getBids(item.getId());
+        List<Bid> usersBidsOnItem = bidsOnItem.stream().filter(bid -> Objects.equals(bid.getUserId(), user.getId())).toList();
+        Double usersBalance = user.getBudget();
+        Double usersLastBidPriceOnItem = 0.0;
+
+        if (!usersBidsOnItem.isEmpty()) {
+            Bid usersLastBidOnItem = usersBidsOnItem.stream().max(Comparator.comparingLong(Bid::getCreatedDate)).get();
+            usersLastBidPriceOnItem = usersLastBidOnItem.getPrice();
+        }
+
+        Double usersCurrentSpending = request.getBidPrice() - usersLastBidPriceOnItem;
+
+        if (usersBalance < usersCurrentSpending) {
+            throw new BadRequestException("Your balance is insufficient!");
+        }
+
+        Double usersNewBalance = usersBalance - usersCurrentSpending;
+
+        userService.update(request.getUserId(), UpdateUserRequest.balanceRequest(usersNewBalance));
+
+        Bid newBid = new Bid(
+                request.getUserId(),
+                id,
+                request.getBidPrice()
+        );
+
+        bidRepository.save(newBid);
+
+        this.update(id, UpdateItemRequest.currentPriceRequest(newBid.getPrice()));
+
+        log.info("Finished handling request= " + request);
+    }
+
+    @Scheduled(fixedRate = 100L)
+    public void checkEndedAuctions() {
+        Criteria searchCriteria = new Criteria().andOperator(
+                Criteria.where("auctionEndDate").lte(System.currentTimeMillis()),
+                Criteria.where("onAuction").is(true)
+        );
+
+        List<Item> result = mongoTemplate.find(Query.query(searchCriteria), Item.class);
+
+        UpdateItemRequest removeFromAuctionRequest = new UpdateItemRequest();
+        removeFromAuctionRequest.setOnAuction(false);
+
+        result.forEach(item -> {
+            try {
+                String itemId = item.getId();
+                List<Bid> itemBids = this.getBids(itemId);
+
+                //remove item from auction
+                this.update(itemId, removeFromAuctionRequest);
+
+                if (!itemBids.isEmpty()) {
+                    //give it to winner user
+                    Bid maximumBid = itemBids.stream().max(Comparator.comparingDouble(Bid::getPrice)).get();
+                    String winnerUserId = maximumBid.getUserId();
+                    userService.addNewItem(winnerUserId, item);
+
+                    //refund loser users money
+                    Set<String> loserUserIds = itemBids.stream()
+                            .filter(bid -> !bid.getUserId().equals(winnerUserId))
+                            .collect(groupingBy(Bid::getUserId))
+                            .keySet();
+
+                    loserUserIds.forEach(userId -> {
+                        try {
+                            userService.refundBidsOnItem(userId, itemId);
+                        } catch (UserNotFoundException e) {
+                            log.error(e.getMessage() + " Bids cannot be refund to user with id: " + userId);
+                        }
+                    });
+                }
+            } catch (ItemNotFoundException | UserNotFoundException | BadRequestException e) {
+                log.error(e.getMessage() + " Item with id: " + item.getId() + " could not remove from auction!!");
+            }
+        });
+    }
+
+    private void validateBidOn(@NotNull Item item, BidOnItemRequest request) throws BadRequestException {
+        if (!item.getOnAuction()) {
+            throw new BadRequestException("You cannot place a bid on item that not actively exist on auction.");
+        }
+
+        if (request.getBidPrice() <= item.getCurrentPrice()) {
+            throw new BadRequestException("You cannot place a bid lower than or equal to current price.");
+        }
     }
 
 

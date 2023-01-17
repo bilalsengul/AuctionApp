@@ -3,6 +3,7 @@ package com.sengul.biddingapinew.application.controller;
 import com.sengul.biddingapinew.application.exception.BadRequestException;
 import com.sengul.biddingapinew.application.exception.UserNotFoundException;
 import com.sengul.biddingapinew.application.request.user.UpdateUserRequest;
+import com.sengul.biddingapinew.domain.model.Bid;
 import com.sengul.biddingapinew.domain.model.User;
 import com.sengul.biddingapinew.domain.service.UserService;
 import jakarta.validation.Valid;
@@ -11,6 +12,8 @@ import jakarta.validation.constraints.NotNull;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 @RestController
 @RequiredArgsConstructor
@@ -29,5 +32,11 @@ public class UserController {
     @ResponseStatus(HttpStatus.ACCEPTED)
     public User update(@NotNull @NotBlank @PathVariable String id, @Valid @RequestBody UpdateUserRequest request) throws UserNotFoundException, BadRequestException {
         return userService.update(id, request);
+    }
+
+    @GetMapping("/{id}/bids")
+    @ResponseStatus(HttpStatus.OK)
+    public List<Bid> getBids(@NotNull @NotBlank @PathVariable String id) throws UserNotFoundException {
+        return userService.getBids(id);
     }
 }

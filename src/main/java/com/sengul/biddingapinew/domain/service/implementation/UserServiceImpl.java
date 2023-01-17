@@ -3,16 +3,22 @@ package com.sengul.biddingapinew.domain.service.implementation;
 import com.sengul.biddingapinew.application.exception.BadRequestException;
 import com.sengul.biddingapinew.application.exception.UserNotFoundException;
 import com.sengul.biddingapinew.application.request.user.UpdateUserRequest;
+import com.sengul.biddingapinew.domain.model.Bid;
 import com.sengul.biddingapinew.domain.model.Item;
 import com.sengul.biddingapinew.domain.model.User;
 import com.sengul.biddingapinew.domain.service.UserService;
+import com.sengul.biddingapinew.infrastructure.repository.BidRepository;
 import com.sengul.biddingapinew.infrastructure.repository.UserRepository;
 import com.sengul.biddingapinew.infrastructure.utils.enums.HttpHeaders;
+import jakarta.validation.constraints.NotNull;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.slf4j.MDC;
 import org.springframework.stereotype.Service;
 
+import java.util.Comparator;
+import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 
 @Service
@@ -21,6 +27,8 @@ import java.util.Optional;
 public class UserServiceImpl implements UserService {
 
     private final UserRepository userRepository;
+
+    private final BidRepository bidRepository;
 
     @Override
     public User get(String id) throws UserNotFoundException {
@@ -82,5 +90,30 @@ public class UserServiceImpl implements UserService {
         userRepository.save(user);
 
         log.info("Finished handling request= AddNewItem(id: " + id + ", item:" + item + ")");
+    }
+
+    @Override
+    public List<Bid> getBids(String id) {
+        log.info("Started handling request= GetBids(id: " + id + ")");
+
+        List<Bid> result = bidRepository.findByUserId(id);
+
+        log.info("Finished handling request= GetBids(id: " + id + ")");
+        return result;
+    }
+
+    @Override
+    public void refundBidsOnItem(String id, @NotNull String itemId) throws UserNotFoundException {
+        log.info("Started handling request= RefundBidsOnItem(id: " + id + ", itemId: " + itemId + ")");
+        User refundUser = this.get(id);
+        List<Bid> refundBids = this.getBids(id).stream().filter(bid -> Objects.equals(bid.getItemId(), itemId)).toList();
+        if (!refundBids.isEmpty()) {
+            Bid maximumBid = refundBids.stream().max(Comparator.comparingDouble(Bid::getPrice)).get();
+            Double refundPrice = maximumBid.getPrice();
+            Double currentBalance = refundUser.getBudget();
+            refundUser.setBudget(currentBalance + refundPrice);
+            userRepository.save(refundUser);
+        }
+        log.info("Finished handling request= RefundBidsOnItem(id: " + id + ", itemId: " + itemId + ")");
     }
 }

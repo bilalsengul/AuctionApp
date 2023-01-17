@@ -59,6 +59,7 @@ public class LoginServiceImpl implements LoginService {
                 "Bilal",
                 "Şengül",
                 "bilalsengul@scopic.com",
+                10000.0,
                 List.of(UserRole.ADMIN, UserRole.REGULAR)
         );
         User admin2 = new User(
@@ -67,6 +68,7 @@ public class LoginServiceImpl implements LoginService {
                 "AdminName",
                 "AdminSurname",
                 "admin@scopic.com",
+                10000.0,
                 List.of(UserRole.ADMIN, UserRole.REGULAR)
         );
         User regular = new User(
@@ -75,6 +77,7 @@ public class LoginServiceImpl implements LoginService {
                 "RegularName",
                 "RegularSurname",
                 "regular@scopic.com",
+                10000.0,
                 List.of(UserRole.REGULAR)
         );
         User regular2 = new User(
@@ -83,6 +86,7 @@ public class LoginServiceImpl implements LoginService {
                 "Regular2Name",
                 "Regular2Surname",
                 "regular2@scopic.com",
+                10000.0,
                 List.of(UserRole.REGULAR)
         );
         Item item = new Item(
