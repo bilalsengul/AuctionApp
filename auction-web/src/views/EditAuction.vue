@@ -140,8 +140,9 @@ export default {
                 }
             ];
         },
-        dateToEpoch(){            
+        dateToEpoch(){          
             this.item.auctionEndDate = this.item.auctionEndDate.getTime();
+            this.item.onAuction = true;
         },
         loadAuction() {
             let loading = this.$loading({

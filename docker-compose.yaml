@@ -1,3 +1,4 @@
+version: '3'
 services:
   database:
     image: mongo
@@ -5,23 +6,28 @@ services:
     ports:
       - 27017:27017
     volumes:
-      - data:/data
+      - auctionapp-data:/data
     environment:
       - MONGO_INITDB_ROOT_USERNAME=rootuser
       - MONGO_INITDB_ROOT_PASSWORD=rootpass
 
-  application:
-    image: biddingapi:latest
-    build:
-      context: .
+  api:
+    build: ./auction-api
+    container_name: api
+    environment:
+      - DB_SERVER=database
     ports:
       - 8080:8080
-    depends_on:
+    links:
       - database
-    environment:
-      - MONGO_INITDB_ROOT_USERNAME=rootuser
-      - MONGO_INITDB_ROOT_PASSWORD=rootpass
 
+  web:
+    build: ./auction-web
+    container_name: web
+    ports:
+      - 3000:80
+    links:
+      - api
 
 volumes:
-  data: { }
+  auctionapp-data:

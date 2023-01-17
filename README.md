@@ -19,9 +19,36 @@ The Auction App allows users to make bids on items, view items they have bid on,
 - To log in and out, use the navigation bar at the top of the page.
 
 ## Getting Started
+<<<<<<< Updated upstream
 
 These instructions will help you set up and run the Auction App on your local machine.
 
+### Prerequisites
+- Git
+- Docker and Docker Compose
+- Java (for back-end)
+- Node.js and npm (for front-end)
+- Maven (for building and running the Java back-end)
+
+### Installing
+
+&nbsp; 1. Clone the repository to your local machine:
+=======
+>>>>>>> Stashed changes
+
+These instructions will help you set up and run the Auction App on your local machine.
+
+<<<<<<< Updated upstream
+&nbsp;2. Navigate to the repository directory:
+
+```bash
+cd AuctionApp
+```
+&nbsp;3. Start the backend and frontend services using Docker Compose:
+
+```bash
+docker-compose -f docker-compose.yaml -f Client/docker-compose.yaml up
+=======
 ### Prerequisites
 - Git
 - Docker and Docker Compose
@@ -37,15 +64,11 @@ These instructions will help you set up and run the Auction App on your local ma
 git clone https://github.com/bilalsengul/AuctionApp.git
 ```
 
-&nbsp;2. Navigate to the repository directory:
+&nbsp;2. Start the backend and frontend services using Docker Compose:
 
 ```bash
-cd AuctionApp
-```
-&nbsp;3. Start the backend and frontend services using Docker Compose:
-
-```bash
-docker-compose -f docker-compose.yaml -f Client/docker-compose.yaml up
+docker-compose up
+>>>>>>> Stashed changes
 ```
 
 
