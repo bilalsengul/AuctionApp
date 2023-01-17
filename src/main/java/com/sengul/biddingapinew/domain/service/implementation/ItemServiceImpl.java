@@ -54,6 +54,7 @@ public class ItemServiceImpl implements ItemService {
                 request.getDescription(),
                 request.getImage(),
                 request.getOpeningPrice(),
+                request.getMinimumAutoBidPrice(),
                 request.isOnAuction(),
                 request.getAuctionEndDate()
         );
@@ -103,6 +104,10 @@ public class ItemServiceImpl implements ItemService {
 
         if (request.getCurrentPrice() != null) {
             item.setCurrentPrice(request.getCurrentPrice());
+        }
+
+        if (request.getMinimumAutoBidPrice() != null) {
+            item.setMinimumAutoBidPrice(request.getMinimumAutoBidPrice());
         }
 
         if (request.getAuctionEndDate() != null) {

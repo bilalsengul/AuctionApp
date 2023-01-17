@@ -29,6 +29,10 @@ public class CreateItemRequest {
     @Positive(message = "openingPrice must be positive double")
     private Double openingPrice;
 
+    @NotNull(message = "minimumAutoBidPrice cannot be null")
+    @Positive(message = "minimumAutoBidPrice must be positive double")
+    private Double minimumAutoBidPrice;
+
     @Nullable
     private boolean onAuction = false;
 

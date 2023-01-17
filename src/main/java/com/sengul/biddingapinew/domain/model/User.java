@@ -25,12 +25,15 @@ public class User {
     private String email;
     private Double budget;
     private Double balance;
+    private Double autoBidBudget;
+    private Double autoBidBalance;
+    private Double autoBidBalanceNotificationThreshold;
     private List<UserRole> roles;
     private List<Item> items;
     private Long createdDate;
     private Long updatedDate;
 
-    public User(String username, String password, String name, String surname, String email, Double budget, List<UserRole> roles) {
+    public User(String username, String password, String name, String surname, String email, Double budget, Double autoBidBudget, List<UserRole> roles) {
         this.id = UUID.randomUUID().toString();
         this.username = username;
         this.password = password;
@@ -39,6 +42,9 @@ public class User {
         this.email = email;
         this.budget = budget;
         this.balance = budget;
+        this.autoBidBudget = autoBidBudget;
+        this.autoBidBalance = autoBidBudget;
+        this.autoBidBalanceNotificationThreshold = 100.0;
         this.roles = roles;
         this.items = null;
         this.createdDate = System.currentTimeMillis();

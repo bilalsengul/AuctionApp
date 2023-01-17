@@ -2,7 +2,9 @@ package com.sengul.biddingapinew.domain.service;
 
 import com.sengul.biddingapinew.application.exception.BadRequestException;
 import com.sengul.biddingapinew.application.exception.UserNotFoundException;
+import com.sengul.biddingapinew.application.request.autobid.UpdateAutoBidDefinitionsRequest;
 import com.sengul.biddingapinew.application.request.user.UpdateUserRequest;
+import com.sengul.biddingapinew.domain.model.AutoBidDefinition;
 import com.sengul.biddingapinew.domain.model.Bid;
 import com.sengul.biddingapinew.domain.model.Item;
 import com.sengul.biddingapinew.domain.model.User;
@@ -19,4 +21,8 @@ public interface UserService {
     List<Bid> getBids(String id) throws UserNotFoundException;
 
     void refundBidsOnItem(String id, String itemId) throws UserNotFoundException;
+
+    List<AutoBidDefinition> updateAutoBidDefinitions(String id, UpdateAutoBidDefinitionsRequest request) throws UserNotFoundException, BadRequestException;
+
+    List<AutoBidDefinition> getAutoBidDefinitions(String id);
 }

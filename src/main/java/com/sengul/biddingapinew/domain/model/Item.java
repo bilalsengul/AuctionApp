@@ -20,6 +20,7 @@ public class Item {
     private String description;
     private Double openingPrice;
     private Double currentPrice;
+    private Double minimumAutoBidPrice;
     private Boolean onAuction;
     private Long auctionEndDate;
     private Long createdDate;
@@ -34,17 +35,19 @@ public class Item {
         this.description = description;
         this.openingPrice = openingPrice;
         this.currentPrice = openingPrice;
+        this.minimumAutoBidPrice = 50.0;
         this.createdDate = System.currentTimeMillis();
         this.updatedDate = System.currentTimeMillis();
     }
 
-    public Item(String name, String description, String image, Double openingPrice, boolean onAuction, Long auctionEndDate) {
+    public Item(String name, String description, String image, Double openingPrice, Double minimumAutoBidPrice, boolean onAuction, Long auctionEndDate) {
         this.id = UUID.randomUUID().toString();
         this.name = name;
         this.description = description;
         this.image = image;
         this.openingPrice = openingPrice;
         this.currentPrice = openingPrice;
+        this.minimumAutoBidPrice = minimumAutoBidPrice;
         this.onAuction = onAuction;
         this.auctionEndDate = auctionEndDate;
         this.createdDate = System.currentTimeMillis();

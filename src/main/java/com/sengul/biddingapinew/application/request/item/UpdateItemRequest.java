@@ -33,6 +33,10 @@ public class UpdateItemRequest {
     private Double currentPrice;
 
     @Nullable
+    @Positive(message = "minimumAutoBidPrice must be positive double")
+    private Double minimumAutoBidPrice;
+
+    @Nullable
     private Boolean onAuction;
 
     @Nullable
@@ -46,6 +50,6 @@ public class UpdateItemRequest {
     }
 
     public static UpdateItemRequest currentPriceRequest(Double currentPrice) {
-        return new UpdateItemRequest(null, null, null, null, currentPrice, null, null);
+        return new UpdateItemRequest(null, null, null, null, currentPrice, null, null, null);
     }
 }

@@ -3,6 +3,7 @@ package com.sengul.biddingapinew.application.controller;
 import com.sengul.biddingapinew.application.exception.BadRequestException;
 import com.sengul.biddingapinew.application.exception.ItemNotFoundException;
 import com.sengul.biddingapinew.application.exception.UserNotFoundException;
+import com.sengul.biddingapinew.application.request.autobid.AutoBidOnItemRequest;
 import com.sengul.biddingapinew.application.request.item.BidOnItemRequest;
 import com.sengul.biddingapinew.application.request.item.CreateItemRequest;
 import com.sengul.biddingapinew.application.request.item.SearchItemRequest;
@@ -10,6 +11,7 @@ import com.sengul.biddingapinew.application.request.item.UpdateItemRequest;
 import com.sengul.biddingapinew.application.response.SearchItemResponse;
 import com.sengul.biddingapinew.domain.model.Bid;
 import com.sengul.biddingapinew.domain.model.Item;
+import com.sengul.biddingapinew.domain.service.AutoBidDefinitionService;
 import com.sengul.biddingapinew.domain.service.ItemService;
 import com.sengul.biddingapinew.infrastructure.utils.enums.HttpHeaders;
 import jakarta.validation.Valid;
@@ -28,6 +30,8 @@ import java.util.List;
 public class ItemController {
 
     private final ItemService itemService;
+
+    private final AutoBidDefinitionService autoBidDefintionService;
 
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
@@ -70,5 +74,12 @@ public class ItemController {
     public void bidOn(@NotNull @NotBlank @PathVariable String id, @Valid @RequestBody BidOnItemRequest request) throws ItemNotFoundException, BadRequestException, UserNotFoundException {
         request.setUserId(MDC.get(HttpHeaders.X_USER_ID.key()));
         itemService.bidOn(id, request);
+    }
+
+    @PostMapping("/{id}/auto-bid")
+    @ResponseStatus(HttpStatus.ACCEPTED)
+    public void autoBid(@NotNull @NotBlank @PathVariable String id, @Valid @RequestBody AutoBidOnItemRequest request) throws BadRequestException, ItemNotFoundException {
+        request.setUserId(MDC.get(HttpHeaders.X_USER_ID.key()));
+        autoBidDefintionService.create(id, request);
     }
 }
