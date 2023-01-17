@@ -1,7 +1,7 @@
 package com.sengul.biddingapinew.application.controller;
 
 import com.sengul.biddingapinew.application.exception.UserNotFoundException;
-import com.sengul.biddingapinew.application.request.LoginRequest;
+import com.sengul.biddingapinew.application.request.global.LoginRequest;
 import com.sengul.biddingapinew.application.response.LoginResponse;
 import com.sengul.biddingapinew.application.response.builder.ResponseEntityBuilder;
 import com.sengul.biddingapinew.domain.service.LoginService;
